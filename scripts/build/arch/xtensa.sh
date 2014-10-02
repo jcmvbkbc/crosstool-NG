@@ -51,9 +51,9 @@ CT_ConfigureXtensa() {
         CT_Abort
     fi
 
-    CT_DoLog EXTRA "Using '${custom_config}' from ${custom_location}"
-    CT_DoExecLog DEBUG ln -sf "${custom_location}/${custom_config}" \
-                              "${CT_TARBALLS_DIR}/${custom_config}"
+    CT_DoLog EXTRA "Using '${custom_overlay}' from ${custom_location}"
+    CT_DoExecLog DEBUG ln -sf "${custom_location}/${custom_overlay}" \
+                              "${CT_TARBALLS_DIR}/${custom_overlay}"
 
     CT_DoExecLog DEBUG touch "${CT_SRC_DIR}/.${basename}.configuring"
 
