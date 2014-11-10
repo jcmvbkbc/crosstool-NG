@@ -1,0 +1,29 @@
+From 0325ee87614a58948774ece8d9d2718cd9bca367 Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Mon, 10 Nov 2014 06:15:26 +0300
+Subject: [PATCH 16/16] xtensa: don't change entry pattern in machine
+ descripton
+
+Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
+---
+ gcc/config/xtensa/xtensa.md | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/gcc/config/xtensa/xtensa.md b/gcc/config/xtensa/xtensa.md
+index 482fd62..935821b 100644
+--- a/gcc/config/xtensa/xtensa.md
++++ b/gcc/config/xtensa/xtensa.md
+@@ -1584,9 +1584,7 @@
+ 	(unspec_volatile:SI [(match_operand:SI 0 "const_int_operand" "i")]
+ 			    UNSPECV_ENTRY))]
+   ""
+-{
+-  return TARGET_WINDOWED_ABI ? "entry\tsp, %0" : "addi\tsp, sp, -%0";
+-}
++  "entry\tsp, %0"
+   [(set_attr "type"	"entry")
+    (set_attr "mode"	"SI")
+    (set_attr "length"	"3")])
+-- 
+1.8.1.4
+

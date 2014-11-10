@@ -1,0 +1,37 @@
+From b1b4c61a540a146d5f1acb31fa065204b83eb6a4 Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Sun, 9 Nov 2014 04:52:36 +0300
+Subject: [PATCH 07/16] xtensa: use correct guards on CRT_CALL_STATIC_FUNCTION
+ definition
+
+CRT_CALL_STATIC_FUNCTION is used in libgcc, so it needs to be defined
+depending on __XTENSA_*_ABI__, not TARGET_WINDOWED_ABI.
+
+Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
+---
+ gcc/config/xtensa/xtensa.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/gcc/config/xtensa/xtensa.h b/gcc/config/xtensa/xtensa.h
+index 9f4a8a1..f7e22ce 100644
+--- a/gcc/config/xtensa/xtensa.h
++++ b/gcc/config/xtensa/xtensa.h
+@@ -880,13 +880,13 @@ typedef struct xtensa_args
+    a MOVI and let the assembler relax it -- for the .init and .fini
+    sections, the assembler knows to put the literal in the right
+    place.  */
+-#if TARGET_WINDOWED_ABI
++#if defined(__XTENSA_WINDOWED_ABI__)
+ #define CRT_CALL_STATIC_FUNCTION(SECTION_OP, FUNC) \
+     asm (SECTION_OP "\n\
+ 	movi\ta8, " USER_LABEL_PREFIX #FUNC "\n\
+ 	callx8\ta8\n" \
+ 	TEXT_SECTION_ASM_OP);
+-#else
++#elif defined(__XTENSA_CALL0_ABI__)
+ #define CRT_CALL_STATIC_FUNCTION(SECTION_OP, FUNC) \
+     asm (SECTION_OP "\n\
+ 	movi\ta0, " USER_LABEL_PREFIX #FUNC "\n\
+-- 
+1.8.1.4
+
