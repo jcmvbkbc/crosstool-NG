@@ -1,7 +1,7 @@
 From 06d069d40208c4ce7456920e8b4f571ac9511821 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 14 Sep 2014 16:43:27 -0700
-Subject: [PATCH 2/3] WIP: xtensa: implement call0 ABI
+Subject: [PATCH 02/16] WIP: xtensa: implement call0 ABI
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---

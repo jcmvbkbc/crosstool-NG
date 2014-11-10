@@ -1,0 +1,159 @@
+From 10543041c49922e358aea2ceebbb13526a7ddfed Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Mon, 10 Nov 2014 05:44:03 +0300
+Subject: [PATCH 14/16] xtensa: drop special cases for SP in machine definition
+
+Instead of adding explicit operations with 'q' constraint for CALL0 ABI
+include SP into 'a' and 'D' constraints and make 'q' constraint empty.
+
+Drop no longer needed abi attribute.
+
+Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
+---
+ gcc/config/xtensa/constraints.md |  6 ++---
+ gcc/config/xtensa/xtensa.md      | 48 ++++++++++++----------------------------
+ 2 files changed, 17 insertions(+), 37 deletions(-)
+
+diff --git a/gcc/config/xtensa/constraints.md b/gcc/config/xtensa/constraints.md
+index 53b3ebfa..440c843 100644
+--- a/gcc/config/xtensa/constraints.md
++++ b/gcc/config/xtensa/constraints.md
+@@ -19,7 +19,7 @@
+ 
+ ;; Register constraints.
+ 
+-(define_register_constraint "a" "GR_REGS"
++(define_register_constraint "a" "TARGET_WINDOWED_ABI ? GR_REGS : AR_REGS"
+  "General-purpose AR registers @code{a0}-@code{a15},
+   except @code{a1} (@code{sp}).")
+ 
+@@ -36,7 +36,7 @@
+  "Floating-point registers @code{f0}-@code{f15}; only available if the
+   Xtensa Floating-Pointer Coprocessor is configured.")
+ 
+-(define_register_constraint "q" "SP_REG"
++(define_register_constraint "q" "TARGET_WINDOWED_ABI ? SP_REG : NO_REGS"
+  "@internal
+   The stack pointer (register @code{a1}).")
+ 
+@@ -53,7 +53,7 @@
+   General-purpose AR registers, but only if the Xtensa 16-Bit Integer
+   Multiply Option is configured.")
+ 
+-(define_register_constraint "D" "TARGET_DENSITY ? GR_REGS: NO_REGS"
++(define_register_constraint "D" "TARGET_DENSITY ? (TARGET_WINDOWED_ABI ? GR_REGS : AR_REGS) : NO_REGS"
+  "@internal
+   General-purpose AR registers, but only if the Xtensa Code Density
+   Option is configured.")
+diff --git a/gcc/config/xtensa/xtensa.md b/gcc/config/xtensa/xtensa.md
+index 9781080..ba634b4 100644
+--- a/gcc/config/xtensa/xtensa.md
++++ b/gcc/config/xtensa/xtensa.md
+@@ -92,15 +92,6 @@
+ 
+ (define_attr "length" "" (const_int 1))
+ 
+-(define_attr "abi" "windowed,call0" (const_string "windowed"))
+-
+-(define_attr "enabled" ""
+- (cond [(eq_attr "abi" "windowed") (const_int 1)
+-  (and (eq_attr "abi" "call0")
+-   (ne (symbol_ref "TARGET_WINDOWED_ABI") (const_int 1)))
+-  (const_int 1)]
+-  (const_int 0))
+- )
+ ;; Describe a user's asm statement.
+ (define_asm_attributes
+   [(set_attr "type" "multi")])
+@@ -151,25 +142,19 @@
+ ;; Addition.
+ 
+ (define_insn "addsi3"
+-  [(set (match_operand:SI 0 "register_operand" "=D,D,r,r,r,q,q,q,q,q")
+-	(plus:SI (match_operand:SI 1 "register_operand" "%d,d,r,r,r,d,d,r,r,r")
+-		 (match_operand:SI 2 "add_operand" "d,O,r,J,N,d,O,r,J,N")))]
++  [(set (match_operand:SI 0 "register_operand" "=D,D,r,r,r")
++	(plus:SI (match_operand:SI 1 "register_operand" "%d,d,r,r,r")
++		 (match_operand:SI 2 "add_operand" "d,O,r,J,N")))]
+   ""
+   "@
+    add.n\t%0, %1, %2
+    addi.n\t%0, %1, %d2
+    add\t%0, %1, %2
+    addi\t%0, %1, %d2
+-   addmi\t%0, %1, %x2
+-   add.n\t%0, %1, %2
+-   addi.n\t%0, %1, %d2
+-   add\t%0, %1, %2
+-   addi\t%0, %1, %d2
+    addmi\t%0, %1, %x2"
+-  [(set_attr "type"	"arith,arith,arith,arith,arith,arith,arith,arith,arith,arith")
++  [(set_attr "type"	"arith,arith,arith,arith,arith")
+    (set_attr "mode"	"SI")
+-   (set_attr "length"	"2,2,3,3,3,2,2,3,3,3")
+-   (set_attr "abi"	"*,*,*,*,*,call0,call0,call0,call0,call0")])
++   (set_attr "length"	"2,2,3,3,3")])
+ 
+ (define_insn "*addx"
+   [(set (match_operand:SI 0 "register_operand" "=a")
+@@ -196,15 +181,14 @@
+ ;; Subtraction.
+ 
+ (define_insn "subsi3"
+-  [(set (match_operand:SI 0 "register_operand" "=a,q")
+-        (minus:SI (match_operand:SI 1 "register_operand" "r,r")
+-		  (match_operand:SI 2 "register_operand" "r,r")))]
++  [(set (match_operand:SI 0 "register_operand" "=a")
++        (minus:SI (match_operand:SI 1 "register_operand" "r")
++		  (match_operand:SI 2 "register_operand" "r")))]
+   ""
+   "sub\t%0, %1, %2"
+-  [(set_attr "type"	"arith,arith")
++  [(set_attr "type"	"arith")
+    (set_attr "mode"	"SI")
+-   (set_attr "length"	"3,3")
+-   (set_attr "abi"	"*,call0")])
++   (set_attr "length"	"3")])
+ 
+ (define_insn "*subx"
+   [(set (match_operand:SI 0 "register_operand" "=a")
+@@ -816,32 +800,28 @@
+ })
+ 
+ (define_insn "movsi_internal"
+-  [(set (match_operand:SI 0 "nonimmed_operand" "=D,D,D,D,d,R,R,a,q,q,a,W,a,a,q,U,*a,*A")
+-	(match_operand:SI 1 "move_operand" "M,D,d,R,R,D,d,r,r,r,I,i,T,U,U,r,*A,*r"))]
++  [(set (match_operand:SI 0 "nonimmed_operand" "=D,D,D,D,R,R,a,q,a,W,a,a,U,*a,*A")
++	(match_operand:SI 1 "move_operand" "M,D,d,R,D,d,r,r,I,i,T,U,r,*A,*r"))]
+   "xtensa_valid_move (SImode, operands)"
+   "@
+    movi.n\t%0, %x1
+    mov.n\t%0, %1
+    mov.n\t%0, %1
+    %v1l32i.n\t%0, %1
+-   %v1l32i.n\t%0, %1
+    %v0s32i.n\t%1, %0
+    %v0s32i.n\t%1, %0
+    mov\t%0, %1
+-   mov\t%0, %1
+    movsp\t%0, %1
+    movi\t%0, %x1
+    const16\t%0, %t1\;const16\t%0, %b1
+    %v1l32r\t%0, %1
+    %v1l32i\t%0, %1
+-   %v1l32i\t%0, %1
+    %v0s32i\t%1, %0
+    rsr\t%0, ACCLO
+    wsr\t%1, ACCLO"
+-  [(set_attr "type" "move,move,move,load,load,store,store,move,move,move,move,move,load,load,load,store,rsr,wsr")
++  [(set_attr "type" "move,move,move,load,store,store,move,move,move,move,load,load,store,rsr,wsr")
+    (set_attr "mode"	"SI")
+-   (set_attr "length"	"2,2,2,2,2,2,2,3,3,3,3,6,3,3,3,3,3,3")
+-   (set_attr "abi"	"*,*,*,*,call0,*,*,*,call0,windowed,*,*,*,*,call0,*,*,*")])
++   (set_attr "length"	"2,2,2,2,2,2,3,3,3,6,3,3,3,3,3")])
+ 
+ ;; 16-bit Integer moves
+ 
+-- 
+1.8.1.4
+

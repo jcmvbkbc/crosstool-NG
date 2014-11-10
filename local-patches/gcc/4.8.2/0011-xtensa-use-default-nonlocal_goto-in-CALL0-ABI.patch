@@ -1,0 +1,82 @@
+From ffda4ff4764984633e3e88374fa38d97a6bb33a4 Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Sun, 9 Nov 2014 23:17:49 +0300
+Subject: [PATCH 11/16] xtensa: use default nonlocal_goto in CALL0 ABI
+
+CALL0 doesn't need any additional stack modifications, so it can use the
+default nonlocal_goto pattern and it doesn't need helper functions to
+spill registers and unwind stack.
+
+Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
+---
+ gcc/config/xtensa/xtensa.md      |  2 +-
+ libgcc/config/xtensa/lib2funcs.S | 12 ++++--------
+ 2 files changed, 5 insertions(+), 9 deletions(-)
+
+diff --git a/gcc/config/xtensa/xtensa.md b/gcc/config/xtensa/xtensa.md
+index 7ddd326..7433b04 100644
+--- a/gcc/config/xtensa/xtensa.md
++++ b/gcc/config/xtensa/xtensa.md
+@@ -1655,7 +1655,7 @@
+    (match_operand:SI 1 "general_operand" "")
+    (match_operand:SI 2 "general_operand" "")
+    (match_operand:SI 3 "" "")]
+-  ""
++  "TARGET_WINDOWED_ABI"
+ {
+   xtensa_expand_nonlocal_goto (operands);
+   DONE;
+diff --git a/libgcc/config/xtensa/lib2funcs.S b/libgcc/config/xtensa/lib2funcs.S
+index f6f7a58..aea4449 100644
+--- a/libgcc/config/xtensa/lib2funcs.S
++++ b/libgcc/config/xtensa/lib2funcs.S
+@@ -29,19 +29,17 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+    current register window.  This is used to set up the stack so that
+    arbitrary frames can be accessed.  */
+ 
++#if XCHAL_HAVE_WINDOWED && !__XTENSA_CALL0_ABI__
+ 	.align	4
+ 	.global	__xtensa_libgcc_window_spill
+ 	.type	__xtensa_libgcc_window_spill,@function
+ __xtensa_libgcc_window_spill:
+-#if XCHAL_HAVE_WINDOWED && !__XTENSA_CALL0_ABI__
+ 	entry	sp, 32
+ 	movi	a2, 0
+ 	syscall
+ 	retw
+-#else
+-	ret
+-#endif
+ 	.size	__xtensa_libgcc_window_spill, .-__xtensa_libgcc_window_spill
++#endif
+ 
+ 
+ /* __xtensa_nonlocal_goto: This code does all the hard work of a
+@@ -55,11 +53,11 @@ __xtensa_libgcc_window_spill:
+   This function never returns to its caller but instead goes directly
+   to the address of the specified goto handler.  */
+ 
++#if XCHAL_HAVE_WINDOWED && !__XTENSA_CALL0_ABI__
+ 	.align	4
+ 	.global	__xtensa_nonlocal_goto
+ 	.type	__xtensa_nonlocal_goto,@function
+ __xtensa_nonlocal_goto:
+-#if XCHAL_HAVE_WINDOWED && !__XTENSA_CALL0_ABI__
+ 	entry	sp, 32
+ 
+ 	/* Flush registers.  */
+@@ -132,10 +130,8 @@ __xtensa_nonlocal_goto:
+ 	src	a0, a8, a3	/* combine them with a funnel shift */
+ 
+ 	retw
+-#else
+-	ret
+-#endif
+ 	.size	__xtensa_nonlocal_goto, .-__xtensa_nonlocal_goto
++#endif
+ 
+ 
+ /* __xtensa_sync_caches: This function is called after writing a trampoline
+-- 
+1.8.1.4
+
