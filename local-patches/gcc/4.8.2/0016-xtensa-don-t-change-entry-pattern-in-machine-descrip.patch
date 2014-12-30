@@ -1,7 +1,7 @@
 From 0325ee87614a58948774ece8d9d2718cd9bca367 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Mon, 10 Nov 2014 06:15:26 +0300
-Subject: [PATCH 16/16] xtensa: don't change entry pattern in machine
+Subject: [PATCH 16/19] xtensa: don't change entry pattern in machine
  descripton
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
