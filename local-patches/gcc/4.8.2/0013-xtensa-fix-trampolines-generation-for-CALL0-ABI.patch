@@ -1,7 +1,7 @@
 From 7234dd9d4ee7af955e1edc20709c06e9d8112581 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Mon, 10 Nov 2014 04:55:15 +0300
-Subject: [PATCH 13/16] xtensa: fix trampolines generation for CALL0 ABI
+Subject: [PATCH 13/19] xtensa: fix trampolines generation for CALL0 ABI
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---

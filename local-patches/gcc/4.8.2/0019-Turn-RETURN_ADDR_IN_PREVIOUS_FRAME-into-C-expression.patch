@@ -1,0 +1,58 @@
+From d850f4988ccc44489f737cd9303b030590016060 Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Sun, 28 Dec 2014 20:52:44 +0300
+Subject: [PATCH 19/19] Turn RETURN_ADDR_IN_PREVIOUS_FRAME into C expression
+
+This allows a target to support both windowed and non-windowed ABI.
+
+Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
+---
+ gcc/builtins.c             | 2 +-
+ gcc/config/sparc/sparc.h   | 2 +-
+ gcc/config/xtensa/xtensa.h | 4 +---
+ 3 files changed, 3 insertions(+), 5 deletions(-)
+
+diff --git a/gcc/builtins.c b/gcc/builtins.c
+index e3c32a9..c9d2eca 100644
+--- a/gcc/builtins.c
++++ b/gcc/builtins.c
+@@ -793,7 +793,7 @@ expand_builtin_return_addr (enum built_in_function fndecl_code, int count)
+      pointer, but it can be accessed off the previous frame pointer by
+      reading the value from the register window save area.  */
+ #ifdef RETURN_ADDR_IN_PREVIOUS_FRAME
+-  if (fndecl_code == BUILT_IN_RETURN_ADDRESS)
++  if (RETURN_ADDR_IN_PREVIOUS_FRAME && fndecl_code == BUILT_IN_RETURN_ADDRESS)
+     count--;
+ #endif
+ 
+diff --git a/gcc/config/sparc/sparc.h b/gcc/config/sparc/sparc.h
+index c6122c1..a0d517a 100644
+--- a/gcc/config/sparc/sparc.h
++++ b/gcc/config/sparc/sparc.h
+@@ -1283,7 +1283,7 @@ do {									\
+    access it from the current frame pointer.  We can access it from the
+    previous frame pointer though by reading a value from the register window
+    save area.  */
+-#define RETURN_ADDR_IN_PREVIOUS_FRAME
++#define RETURN_ADDR_IN_PREVIOUS_FRAME 1
+ 
+ /* This is the offset of the return address to the true next instruction to be
+    executed for the current function.  */
+diff --git a/gcc/config/xtensa/xtensa.h b/gcc/config/xtensa/xtensa.h
+index 7c6eacc..c36a6a6 100644
+--- a/gcc/config/xtensa/xtensa.h
++++ b/gcc/config/xtensa/xtensa.h
+@@ -625,9 +625,7 @@ typedef struct xtensa_args
+ 
+ /* Define this if the return address of a particular stack frame is
+    accessed from the frame pointer of the previous stack frame.  */
+-#if TARGET_WINDOWED_ABI
+-#define RETURN_ADDR_IN_PREVIOUS_FRAME
+-#endif
++#define RETURN_ADDR_IN_PREVIOUS_FRAME TARGET_WINDOWED_ABI
+ 
+ /* A C expression whose value is RTL representing the value of the
+    return address for the frame COUNT steps up from the current
+-- 
+1.8.1.4
+

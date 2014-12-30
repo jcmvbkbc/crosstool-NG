@@ -1,0 +1,77 @@
+From b09e6a7ccc646f61944e4d99fd31dc91aeec0ab8 Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Sun, 28 Dec 2014 07:08:44 +0300
+Subject: [PATCH 17/19] xtensa: don't modify call* patterns, use is_leaf
+
+Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
+---
+ gcc/config/xtensa/xtensa.c  |  2 +-
+ gcc/config/xtensa/xtensa.md | 18 +++++++-----------
+ 2 files changed, 8 insertions(+), 12 deletions(-)
+
+diff --git a/gcc/config/xtensa/xtensa.c b/gcc/config/xtensa/xtensa.c
+index 1b82c75..ba936e7 100644
+--- a/gcc/config/xtensa/xtensa.c
++++ b/gcc/config/xtensa/xtensa.c
+@@ -2591,7 +2591,7 @@ xtensa_call_save_reg(int regno)
+     return false;
+ 
+   if (regno == A0_REG)
+-    return crtl->profile || df_regs_ever_live_p (regno);
++    return crtl->profile || !crtl->is_leaf || df_regs_ever_live_p (regno);
+ 
+   return !fixed_regs[regno] && !call_used_regs[regno] &&
+     df_regs_ever_live_p (regno);
+diff --git a/gcc/config/xtensa/xtensa.md b/gcc/config/xtensa/xtensa.md
+index 935821b..e377df0 100644
+--- a/gcc/config/xtensa/xtensa.md
++++ b/gcc/config/xtensa/xtensa.md
+@@ -1526,9 +1526,8 @@
+   "")
+ 
+ (define_expand "call"
+-  [(parallel [(call (match_operand 0 "memory_operand" "")
+-	            (match_operand 1 "" ""))
+-              (clobber (reg:SI A0_REG))])]
++  [(call (match_operand 0 "memory_operand" "")
++	 (match_operand 1 "" ""))]
+   ""
+ {
+   rtx addr = XEXP (operands[0], 0);
+@@ -1541,8 +1540,7 @@
+ 
+ (define_insn "call_internal"
+   [(call (mem (match_operand:SI 0 "call_insn_operand" "nir"))
+-	 (match_operand 1 "" "i"))
+-   (clobber (reg:SI A0_REG))]
++	 (match_operand 1 "" "i"))]
+   ""
+ {
+   return xtensa_emit_call (0, operands);
+@@ -1552,10 +1550,9 @@
+    (set_attr "length"	"3")])
+ 
+ (define_expand "call_value"
+-  [(parallel [(set (match_operand 0 "register_operand" "")
+-	           (call (match_operand 1 "memory_operand" "")
+-		         (match_operand 2 "" "")))
+-              (clobber (reg:SI A0_REG))])]
++  [(set (match_operand 0 "register_operand" "")
++	(call (match_operand 1 "memory_operand" "")
++	      (match_operand 2 "" "")))]
+   ""
+ {
+   rtx addr = XEXP (operands[1], 0);
+@@ -1569,8 +1566,7 @@
+ (define_insn "call_value_internal"
+   [(set (match_operand 0 "register_operand" "=a")
+         (call (mem (match_operand:SI 1 "call_insn_operand" "nir"))
+-              (match_operand 2 "" "i")))
+-   (clobber (reg:SI A0_REG))]
++              (match_operand 2 "" "i")))]
+   ""
+ {
+   return xtensa_emit_call (1, operands);
+-- 
+1.8.1.4
+
