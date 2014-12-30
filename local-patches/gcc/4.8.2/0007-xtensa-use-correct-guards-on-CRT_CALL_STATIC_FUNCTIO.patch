@@ -1,7 +1,7 @@
 From b1b4c61a540a146d5f1acb31fa065204b83eb6a4 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 9 Nov 2014 04:52:36 +0300
-Subject: [PATCH 07/16] xtensa: use correct guards on CRT_CALL_STATIC_FUNCTION
+Subject: [PATCH 07/19] xtensa: use correct guards on CRT_CALL_STATIC_FUNCTION
  definition
 
 CRT_CALL_STATIC_FUNCTION is used in libgcc, so it needs to be defined
