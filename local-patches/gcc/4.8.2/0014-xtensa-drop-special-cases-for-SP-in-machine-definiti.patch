@@ -1,7 +1,7 @@
 From 10543041c49922e358aea2ceebbb13526a7ddfed Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Mon, 10 Nov 2014 05:44:03 +0300
-Subject: [PATCH 14/19] xtensa: drop special cases for SP in machine definition
+Subject: [PATCH 14/24] xtensa: drop special cases for SP in machine definition
 
 Instead of adding explicit operations with 'q' constraint for CALL0 ABI
 include SP into 'a' and 'D' constraints and make 'q' constraint empty.

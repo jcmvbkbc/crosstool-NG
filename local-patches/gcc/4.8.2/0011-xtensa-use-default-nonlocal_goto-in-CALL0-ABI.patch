@@ -1,7 +1,7 @@
 From ffda4ff4764984633e3e88374fa38d97a6bb33a4 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 9 Nov 2014 23:17:49 +0300
-Subject: [PATCH 11/19] xtensa: use default nonlocal_goto in CALL0 ABI
+Subject: [PATCH 11/24] xtensa: use default nonlocal_goto in CALL0 ABI
 
 CALL0 doesn't need any additional stack modifications, so it can use the
 default nonlocal_goto pattern and it doesn't need helper functions to

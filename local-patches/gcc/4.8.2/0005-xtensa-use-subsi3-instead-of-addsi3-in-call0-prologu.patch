@@ -1,7 +1,7 @@
 From 1acaae7db15d0da960cbfd470533a51d8551f7b9 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 5 Oct 2014 06:26:18 +0400
-Subject: [PATCH 05/19] xtensa: use subsi3 instead of addsi3 in call0 prologue
+Subject: [PATCH 05/24] xtensa: use subsi3 instead of addsi3 in call0 prologue
 
 This allows sharing single literal for stack adjustment between prologue
 and epilogue.
