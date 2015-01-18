@@ -1,7 +1,7 @@
 From 41db05e3a4a44bc6efdf464fe60b4484cfee93bb Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 28 Dec 2014 07:07:49 +0300
-Subject: [PATCH 18/19] xtensa: adjust register class definitions at runtime
+Subject: [PATCH 18/24] xtensa: adjust register class definitions at runtime
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---

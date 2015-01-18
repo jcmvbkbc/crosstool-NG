@@ -1,7 +1,7 @@
 From 0b74cbfbbf3aa9b67f1c9f1971e98b0980b10661 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 5 Oct 2014 05:54:31 +0400
-Subject: [PATCH 04/19] xtensa: always emit .literal_position for call0 ABI
+Subject: [PATCH 04/24] xtensa: always emit .literal_position for call0 ABI
 
 xtensa assembler implicitly starts literal pool before entry
 instructions. Emit .literal_position at the beginning of function for
