@@ -1,0 +1,115 @@
+From 5734054799af51281560490e3c4df42579e90dfb Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Wed, 7 Jan 2015 08:03:48 +0300
+Subject: [PATCH 24/24] xtensa: use default DWARF unwinder for call0 ABI
+
+Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
+---
+ libgcc/config/xtensa/linux-unwind.h |  3 +++
+ libgcc/config/xtensa/t-windowed     |  2 ++
+ libgcc/config/xtensa/t-xtensa       |  3 ---
+ libgcc/configure                    | 21 +++++++++++++++++++++
+ libgcc/configure.ac                 | 16 ++++++++++++++++
+ 5 files changed, 42 insertions(+), 3 deletions(-)
+ create mode 100644 libgcc/config/xtensa/t-windowed
+
+diff --git a/libgcc/config/xtensa/linux-unwind.h b/libgcc/config/xtensa/linux-unwind.h
+index a942024..18cedbf 100644
+--- a/libgcc/config/xtensa/linux-unwind.h
++++ b/libgcc/config/xtensa/linux-unwind.h
+@@ -52,6 +52,7 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+ #define ENTRY_BYTE 0x36
+ #endif
+ 
++#ifdef __XTENSA_WINDOWED_ABI__
+ #define MD_FALLBACK_FRAME_STATE_FOR xtensa_fallback_frame_state
+ 
+ static _Unwind_Reason_Code
+@@ -94,4 +95,6 @@ xtensa_fallback_frame_state (struct _Unwind_Context *context,
+   return _URC_NO_REASON;
+ }
+ 
++#endif /* __XTENSA_WINDOWED_ABI__ */
++
+ #endif /* ifdef inhibit_libc  */
+diff --git a/libgcc/config/xtensa/t-windowed b/libgcc/config/xtensa/t-windowed
+new file mode 100644
+index 0000000..7d9e9db
+--- /dev/null
++++ b/libgcc/config/xtensa/t-windowed
+@@ -0,0 +1,2 @@
++LIB2ADDEH = $(srcdir)/config/xtensa/unwind-dw2-xtensa.c \
++   $(srcdir)/unwind-dw2-fde.c $(srcdir)/unwind-sjlj.c $(srcdir)/unwind-c.c
+diff --git a/libgcc/config/xtensa/t-xtensa b/libgcc/config/xtensa/t-xtensa
+index 27399e6..ed3eb84 100644
+--- a/libgcc/config/xtensa/t-xtensa
++++ b/libgcc/config/xtensa/t-xtensa
+@@ -11,6 +11,3 @@ LIB1ASMFUNCS = _mulsi3 _divsi3 _modsi3 _udivsi3 _umodsi3 \
+ 	_truncdfsf2 _extendsfdf2
+ 
+ LIB2ADD = $(srcdir)/config/xtensa/lib2funcs.S
+-
+-LIB2ADDEH = $(srcdir)/config/xtensa/unwind-dw2-xtensa.c \
+-   $(srcdir)/unwind-dw2-fde.c $(srcdir)/unwind-sjlj.c $(srcdir)/unwind-c.c
+diff --git a/libgcc/configure b/libgcc/configure
+index 1425df6..03ea7ed 100644
+--- a/libgcc/configure
++++ b/libgcc/configure
+@@ -4326,6 +4326,27 @@ EOF
+   ;;
+ esac
+ 
++# Check if xtensa target is configured for windowed ABI and thus needs to use
++# custom unwind code.
++# This is after config.host so we can augment tmake_file.
++case ${host} in
++xtensa*-*)
++  cat > conftest.c <<EOF
++	#ifdef __XTENSA_CALL0_ABI__
++	#error
++	#endif
++EOF
++  if { ac_try='${CC-cc} -E -o conftest.i conftest.c 1>&5'
++  { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
++  (eval $ac_try) 2>&5
++  ac_status=$?
++  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
++  test $ac_status = 0; }; }; then
++      tmake_file="${tmake_file} xtensa/t-windowed"
++  fi
++  ;;
++esac
++
+ # Check for visibility support.  This is after config.host so that
+ # we can check for asm_hidden_op.
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for __attribute__((visibility(\"hidden\")))" >&5
+diff --git a/libgcc/configure.ac b/libgcc/configure.ac
+index 8b7aba5..8ce0482 100644
+--- a/libgcc/configure.ac
++++ b/libgcc/configure.ac
+@@ -294,6 +294,22 @@ EOF
+   ;;
+ esac
+ 
++# Check if xtensa target is configured for windowed ABI and thus needs to use
++# custom unwind code.
++# This is after config.host so we can augment tmake_file.
++case ${host} in
++xtensa*-*)
++  cat > conftest.c <<EOF
++	#ifdef __XTENSA_CALL0_ABI__
++	#error
++	#endif
++EOF
++  if AC_TRY_COMMAND(${CC-cc} -E -o conftest.i conftest.c 1>&AS_MESSAGE_LOG_FD); then
++      tmake_file="${tmake_file} xtensa/t-windowed"
++  fi
++  ;;
++esac
++
+ # Check for visibility support.  This is after config.host so that
+ # we can check for asm_hidden_op.
+ AC_CACHE_CHECK([for __attribute__((visibility("hidden")))],
+-- 
+1.8.1.4
+

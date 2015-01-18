@@ -1,7 +1,7 @@
 From b09e6a7ccc646f61944e4d99fd31dc91aeec0ab8 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 28 Dec 2014 07:08:44 +0300
-Subject: [PATCH 17/19] xtensa: don't modify call* patterns, use is_leaf
+Subject: [PATCH 17/24] xtensa: don't modify call* patterns, use is_leaf
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---

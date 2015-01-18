@@ -1,7 +1,7 @@
 From 8fc87fc4ac361effe8903b433a622c339c076a4f Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 9 Nov 2014 06:31:09 +0300
-Subject: [PATCH 10/19] xtensa: replace #if/#ifdef with if where possible
+Subject: [PATCH 10/24] xtensa: replace #if/#ifdef with if where possible
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---

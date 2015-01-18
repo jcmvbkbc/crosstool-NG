@@ -1,7 +1,7 @@
 From 2f60e5db550a287c58e6e69d993946818d01159c Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 9 Nov 2014 06:24:08 +0300
-Subject: [PATCH 08/19] xtensa: move callee-saved register check to
+Subject: [PATCH 08/24] xtensa: move callee-saved register check to
  xtensa_call_save_reg
 
 Don't reserve extra stack space with windowed ABI. Save A0 when
