@@ -1,7 +1,7 @@
 From 676b5a725bd71c9deb72b1957a5e6cf892d5d9fb Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 14 Sep 2014 21:15:14 -0700
-Subject: [PATCH 01/19] WIP: xtensa: fix lib code for call0 ABI
+Subject: [PATCH 01/24] WIP: xtensa: fix lib code for call0 ABI
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---

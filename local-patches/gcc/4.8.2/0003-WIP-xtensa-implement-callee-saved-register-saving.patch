@@ -1,7 +1,7 @@
 From d82c531991bb31e864e05f02032187f2e9dbc66f Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 28 Sep 2014 22:52:01 +0400
-Subject: [PATCH 03/19] WIP: xtensa: implement callee-saved register saving
+Subject: [PATCH 03/24] WIP: xtensa: implement callee-saved register saving
 
 Also fix frame pointer, correctly move stack pointer, and avoid movsp.
 

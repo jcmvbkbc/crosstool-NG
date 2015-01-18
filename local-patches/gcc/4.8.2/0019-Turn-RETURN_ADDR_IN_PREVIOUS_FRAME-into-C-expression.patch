@@ -1,7 +1,7 @@
 From d850f4988ccc44489f737cd9303b030590016060 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 28 Dec 2014 20:52:44 +0300
-Subject: [PATCH 19/19] Turn RETURN_ADDR_IN_PREVIOUS_FRAME into C expression
+Subject: [PATCH 19/24] Turn RETURN_ADDR_IN_PREVIOUS_FRAME into C expression
 
 This allows a target to support both windowed and non-windowed ABI.
 
