@@ -1,0 +1,38 @@
+## For the OS X target to be able to work, ask support@travis-ci.com
+## to enable Multiple Operating Systems support on project
+## https://travis-ci.org/.../...
+
+sudo: true
+language: c
+compiler: gcc
+os: 
+  - osx
+  - linux
+
+cache:
+  directories:
+  - $TRAVIS_BUILD_DIR/.build/tarballs/
+  
+script:
+- sed -i -e 's|default LOG_INFO if !DEBUG_CT|default LOG_EXTRA if !DEBUG_CT|g' ./config/global/logging.in
+- if [ "$TRAVIS_OS_NAME" == "linux" ] ; then sudo apt-get update -qq ; fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ] ; then sudo apt-get install -qq autoconf gperf bison flex texinfo libtool libncurses5-dev gawk python-serial libexpat-dev ; fi
+- unset LD_LIBRARY_PATH
+- ./bootstrap && ./configure --prefix=`pwd` && make && make install
+- ./ct-ng xtensa-lx106-elf
+- ./ct-ng build
+- cd ./builds
+- if [ "$TRAVIS_OS_NAME" == "linux" ] ; then tar czf $TRAVIS_BUILD_DIR/linux64-xtensa-lx106-elf.tgz xtensa-lx106-elf/ ; fi
+- ls -lh $TRAVIS_BUILD_DIR/*-xtensa-lx106-elf.tgz
+
+deploy:
+  provider: releases
+  api_key:
+    secure: VPr9NOFNvJbCulF046VtP8x7iI8bckcjqR7oZBRIgtYRP9d2YsE0BCBd+kqscVLlKZWfd4U061RlSIrKY0HoMQUYHphndLdJILjXPr65iw1jAOiJWSwqSoaqkUsQu7/VjlG0AdMviFPe4TURQK4AgXjtPTyJ0xFLeC8Q4UDX40c=
+  skip_cleanup: true
+  file_glob: true
+  file: 
+    - '$TRAVIS_BUILD_DIR/*-xtensa-lx106-elf.tgz'
+  on:
+    tags: true
+    all_branches: true
