@@ -1,7 +1,7 @@
 From 46ae7a2cc28b40fef95b860d042a86c3f198183a Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Tue, 6 Jan 2015 14:24:47 +0300
-Subject: [PATCH 21/24] xtensa: don't emit CFA notes in epilogue
+Subject: [PATCH 21/25] xtensa: don't emit CFA notes in epilogue
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---

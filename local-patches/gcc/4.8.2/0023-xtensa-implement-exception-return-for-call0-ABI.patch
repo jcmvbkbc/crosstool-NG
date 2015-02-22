@@ -1,7 +1,7 @@
 From 601180aced8f4d0b4dd6ebfe0abc0bdd26a0cd72 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Mon, 12 Jan 2015 15:21:31 +0300
-Subject: [PATCH 23/24] xtensa: implement exception return for call0 ABI
+Subject: [PATCH 23/25] xtensa: implement exception return for call0 ABI
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---

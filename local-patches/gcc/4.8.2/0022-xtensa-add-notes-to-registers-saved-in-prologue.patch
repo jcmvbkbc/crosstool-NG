@@ -1,7 +1,7 @@
 From a1fa1f57102825b18926469d5bfa538b0c25bc11 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sat, 10 Jan 2015 15:51:22 +0300
-Subject: [PATCH 22/24] xtensa: add notes to registers saved in prologue
+Subject: [PATCH 22/25] xtensa: add notes to registers saved in prologue
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---
