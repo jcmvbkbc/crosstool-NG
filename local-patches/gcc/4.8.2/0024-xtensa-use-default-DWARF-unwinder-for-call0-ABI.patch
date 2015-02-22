@@ -1,7 +1,7 @@
 From 5734054799af51281560490e3c4df42579e90dfb Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Wed, 7 Jan 2015 08:03:48 +0300
-Subject: [PATCH 24/24] xtensa: use default DWARF unwinder for call0 ABI
+Subject: [PATCH 24/25] xtensa: use default DWARF unwinder for call0 ABI
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---
