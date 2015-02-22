@@ -1,7 +1,7 @@
 From c73b720ae2759c70a4c657962e0bcb40c42fd9bc Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 9 Nov 2014 06:26:29 +0300
-Subject: [PATCH 09/24] WIP: xtensa: fix _mcount call for CALL0 ABI
+Subject: [PATCH 09/25] WIP: xtensa: fix _mcount call for CALL0 ABI
 
 _mcount is not specified, let's call it with return address in a10, and
 require it to preserve all registers.

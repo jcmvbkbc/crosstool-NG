@@ -1,7 +1,7 @@
 From 2d1af52aaa84f8e15a32eeb5ec58868f842a8acc Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 9 Nov 2014 03:48:56 +0300
-Subject: [PATCH 06/24] xtensa: don't mess with argument in a7 in CALL0 ABI
+Subject: [PATCH 06/25] xtensa: don't mess with argument in a7 in CALL0 ABI
 
 Otherwise prologue ends with frame pointer in a7 instead of a15. CALL0
 ABI doesn't need this special care because a7 is an ordinary register in
