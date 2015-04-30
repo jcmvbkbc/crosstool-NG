@@ -1,0 +1,104 @@
+diff -ur gcc-4.8.2/gcc/graphite-blocking.c gcc-4.8.2.org/gcc/graphite-blocking.c
+--- gcc-4.8.2/gcc/graphite-blocking.c	2013-01-10 21:38:27.000000000 +0100
++++ gcc-4.8.2.org/gcc/graphite-blocking.c	2015-04-27 22:55:17.000000000 +0200
+@@ -22,6 +22,7 @@
+ <http://www.gnu.org/licenses/>.  */
+ 
+ #include "config.h"
++#include <stddef.h>
+ 
+ #ifdef HAVE_cloog
+ #include <isl/set.h>
+diff -ur gcc-4.8.2/gcc/graphite-clast-to-gimple.c gcc-4.8.2.org/gcc/graphite-clast-to-gimple.c
+--- gcc-4.8.2/gcc/graphite-clast-to-gimple.c	2013-01-10 21:38:27.000000000 +0100
++++ gcc-4.8.2.org/gcc/graphite-clast-to-gimple.c	2015-04-27 22:55:24.000000000 +0200
+@@ -19,6 +19,7 @@
+ <http://www.gnu.org/licenses/>.  */
+ 
+ #include "config.h"
++#include <stddef.h>
+ 
+ #ifdef HAVE_cloog
+ #include <isl/set.h>
+diff -ur gcc-4.8.2/gcc/graphite-dependences.c gcc-4.8.2.org/gcc/graphite-dependences.c
+--- gcc-4.8.2/gcc/graphite-dependences.c	2013-01-10 21:38:27.000000000 +0100
++++ gcc-4.8.2.org/gcc/graphite-dependences.c	2015-04-27 22:55:30.000000000 +0200
+@@ -20,6 +20,7 @@
+ <http://www.gnu.org/licenses/>.  */
+ 
+ #include "config.h"
++#include <stddef.h>
+ 
+ #ifdef HAVE_cloog
+ #include <isl/set.h>
+diff -ur gcc-4.8.2/gcc/graphite-interchange.c gcc-4.8.2.org/gcc/graphite-interchange.c
+--- gcc-4.8.2/gcc/graphite-interchange.c	2013-01-10 21:38:27.000000000 +0100
++++ gcc-4.8.2.org/gcc/graphite-interchange.c	2015-04-27 22:55:36.000000000 +0200
+@@ -22,6 +22,7 @@
+ <http://www.gnu.org/licenses/>.  */
+ 
+ #include "config.h"
++#include <stddef.h>
+ 
+ #ifdef HAVE_cloog
+ #include <isl/aff.h>
+diff -ur gcc-4.8.2/gcc/graphite-optimize-isl.c gcc-4.8.2.org/gcc/graphite-optimize-isl.c
+--- gcc-4.8.2/gcc/graphite-optimize-isl.c	2013-01-10 21:38:27.000000000 +0100
++++ gcc-4.8.2.org/gcc/graphite-optimize-isl.c	2015-04-27 22:55:42.000000000 +0200
+@@ -19,6 +19,7 @@
+ <http://www.gnu.org/licenses/>.  */
+ 
+ #include "config.h"
++#include <stddef.h>
+ 
+ #ifdef HAVE_cloog
+ #include <isl/set.h>
+diff -ur gcc-4.8.2/gcc/graphite-poly.c gcc-4.8.2.org/gcc/graphite-poly.c
+--- gcc-4.8.2/gcc/graphite-poly.c	2013-01-10 21:38:27.000000000 +0100
++++ gcc-4.8.2.org/gcc/graphite-poly.c	2015-04-27 22:55:46.000000000 +0200
+@@ -20,6 +20,7 @@
+ <http://www.gnu.org/licenses/>.  */
+ 
+ #include "config.h"
++#include <stddef.h>
+ 
+ #ifdef HAVE_cloog
+ #include <isl/set.h>
+diff -ur gcc-4.8.2/gcc/graphite-scop-detection.c gcc-4.8.2.org/gcc/graphite-scop-detection.c
+--- gcc-4.8.2/gcc/graphite-scop-detection.c	2013-01-10 21:38:27.000000000 +0100
++++ gcc-4.8.2.org/gcc/graphite-scop-detection.c	2015-04-27 22:55:52.000000000 +0200
+@@ -20,6 +20,7 @@
+ <http://www.gnu.org/licenses/>.  */
+ 
+ #include "config.h"
++#include <stddef.h>
+ 
+ #ifdef HAVE_cloog
+ #include <isl/set.h>
+diff -ur gcc-4.8.2/gcc/graphite-sese-to-poly.c gcc-4.8.2.org/gcc/graphite-sese-to-poly.c
+--- gcc-4.8.2/gcc/graphite-sese-to-poly.c	2013-01-14 14:06:47.000000000 +0100
++++ gcc-4.8.2.org/gcc/graphite-sese-to-poly.c	2015-04-27 22:56:00.000000000 +0200
+@@ -20,6 +20,7 @@
+ 
+ #include "config.h"
+ 
++#include <stddef.h>
+ #ifdef HAVE_cloog
+ #include <isl/set.h>
+ #include <isl/map.h>
+diff -ur gcc-4.8.2/gcc/graphite.c gcc-4.8.2.org/gcc/graphite.c
+--- gcc-4.8.2/gcc/graphite.c	2013-01-10 21:38:27.000000000 +0100
++++ gcc-4.8.2.org/gcc/graphite.c	2015-04-27 22:56:08.000000000 +0200
+@@ -33,7 +33,9 @@
+    the functions that are used for transforming the code.  */
+ 
+ #include "config.h"
++#include <stddef.h>
+ 
++#include <stddef.h>
+ #ifdef HAVE_cloog
+ #include <isl/set.h>
+ #include <isl/map.h>
+diff -ur gcc-4.8.2/include/xtensa-config.h gcc-4.8.2.org/include/xtensa-config.h
+--- gcc-4.8.2/include/xtensa-config.h	2011-01-03 21:52:22.000000000 +0100
++++ gcc-4.8.2.org/include/xtensa-config.h	2010-05-17 19:26:02.000000000 +0200
