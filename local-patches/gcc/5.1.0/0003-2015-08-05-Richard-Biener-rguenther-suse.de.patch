@@ -1,0 +1,30 @@
+From 14df71e4bcac658336b0bcb10fb7b17d67bcf556 Mon Sep 17 00:00:00 2001
+From: rguenth <rguenth@138bc75d-0d04-0410-961f-82ee72b054a4>
+Date: Wed, 5 Aug 2015 10:01:12 +0000
+Subject: [PATCH] 2015-08-05  Richard Biener  <rguenther@suse.de>
+
+	PR tree-optimization/67055
+	* tree-ssa-ccp.c (fold_builtin_alloca_with_align): Handle
+	NULL gimple_block.
+
+git-svn-id: svn+ssh://gcc.gnu.org/svn/gcc/trunk@226616 138bc75d-0d04-0410-961f-82ee72b054a4
+---
+ gcc/tree-ssa-ccp.c                     |  1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 gcc/testsuite/g++.dg/torture/pr67055.C
+
+diff --git a/gcc/tree-ssa-ccp.c b/gcc/tree-ssa-ccp.c
+index a18caa1..398ddc1 100644
+--- a/gcc/tree-ssa-ccp.c
++++ b/gcc/tree-ssa-ccp.c
+@@ -2107,6 +2107,7 @@ fold_builtin_alloca_with_align (gimple stmt)
+      as a declared array, so we allow a larger size.  */
+   block = gimple_block (stmt);
+   if (!(cfun->after_inlining
++	&& block
+         && TREE_CODE (BLOCK_SUPERCONTEXT (block)) == FUNCTION_DECL))
+     threshold /= 10;
+   if (size > threshold)
+-- 
+1.8.1.4
+
