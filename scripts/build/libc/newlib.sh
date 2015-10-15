@@ -51,6 +51,10 @@ do_libc_extract() {
         CT_Extract ${LIBC_NEWLIB_AVR_HDRS_BASE}     \
                    -d ${CT_SRC_DIR}/${LIBC_NEWLIB_AVR_HDRS_BASE}
     fi
+
+    if [ -n "${CT_ARCH_XTENSA_CUSTOM_NAME}" ]; then
+        CT_ConfigureXtensa "newlib" "${CT_LIBC_VERSION}"
+    fi
 }
 
 do_libc_check_config() {
