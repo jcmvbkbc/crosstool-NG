@@ -11,6 +11,10 @@ CT_SAMPLES := $(shell echo $(sort $(CT_TOP_SAMPLES) $(CT_LIB_SAMPLES))  \
                       |$(sed) -r -e 's/(.*),(.*)/\2,\1/;'               \
                )
 
+# If set to yes on command line, updates the sample configuration
+# instead of just dumping the diff.
+CT_UPDATE_SAMPLES := no
+
 # ----------------------------------------------------------
 # This part deals with the samples help entries
 
@@ -42,11 +46,11 @@ show-config: .config
 
 # Prints the details of a sample
 PHONY += $(patsubst %,show-%,$(CT_SAMPLES))
-$(patsubst %,show-%,$(CT_SAMPLES)): config_files
+$(patsubst %,show-%,$(CT_SAMPLES)): show-%: config_files
 	@KCONFIG_CONFIG=$$(pwd)/.config.sample	\
-	    $(CONF) --defconfig=$(call sample_dir,$(patsubst show-%,%,$(@)))/crosstool.config   \
+	    $(CONF) --defconfig=$(call sample_dir,$*)/crosstool.config   \
 	            $(KCONFIG_TOP) >/dev/null
-	@$(CT_LIB_DIR)/scripts/showSamples.sh -v $(patsubst show-%,%,$(@))
+	@$(CT_LIB_DIR)/scripts/showSamples.sh -v $*
 	@rm -f .config.sample
 
 # Prints the details of all samples
@@ -66,11 +70,11 @@ list-samples-pre: FORCE
 	@echo 'Status  Sample name'
 
 PHONY += $(patsubst %,list-%,$(CT_SAMPLES))
-$(patsubst %,list-%,$(CT_SAMPLES)): config_files
+$(patsubst %,list-%,$(CT_SAMPLES)): list-%: config_files
 	@KCONFIG_CONFIG=$$(pwd)/.config.sample	\
-	    $(CONF) --defconfig=$(call sample_dir,$(patsubst list-%,%,$(@)))/crosstool.config   \
+	    $(CONF) --defconfig=$(call sample_dir,$*)/crosstool.config   \
 	            $(KCONFIG_TOP) >/dev/null
-	@$(CT_LIB_DIR)/scripts/showSamples.sh $(patsubst list-%,%,$(@))
+	@$(CT_LIB_DIR)/scripts/showSamples.sh $*
 	@rm -f .config.sample
 
 PHONY += list-samples-short
@@ -81,20 +85,28 @@ list-samples-short: FORCE
 
 # Check one sample
 PHONY += $(patsubst %,check-%,$(CT_SAMPLES))
-$(patsubst %,check-%,$(CT_SAMPLES)): config_files
+$(patsubst %,check-%,$(CT_SAMPLES)): check-%: config_files
 	@export KCONFIG_CONFIG=$$(pwd)/.config.sample;                                  \
-	 CT_NG_SAMPLE=$(call sample_dir,$(patsubst check-%,%,$(@)))/crosstool.config;   \
-	 $(CONF) --defconfig=$${CT_NG_SAMPLE} $(KCONFIG_TOP) >/dev/null;                \
-	 $(CONF) --savedefconfig=$$(pwd)/.defconfig $(KCONFIG_TOP) >/dev/null;          \
+	 CT_NG_SAMPLE=$(call sample_dir,$*)/crosstool.config;                           \
+	 $(CONF) -s --defconfig=$${CT_NG_SAMPLE} $(KCONFIG_TOP) &>/dev/null;            \
+	 $(CONF) -s --savedefconfig=$$(pwd)/.defconfig $(KCONFIG_TOP) &>/dev/null;      \
 	 old_sha1=$$( sha1sum "$${CT_NG_SAMPLE}" |cut -d ' ' -f 1 );                    \
 	 new_sha1=$$( sha1sum .defconfig |cut -d ' ' -f 1 );                            \
 	 if [ $${old_sha1} != $${new_sha1} ]; then                                      \
-	    echo "$(patsubst check-%,%,$(@)) needs update:";                            \
-	    diff -du0 "$${CT_NG_SAMPLE}" .defconfig |tail -n +4;                        \
+	    if [ $(CT_UPDATE_SAMPLES) = yes ]; then                                     \
+	        echo "Updating $*";                                                     \
+		mv .defconfig "$${CT_NG_SAMPLE}";                                       \
+	    else                                                                        \
+		echo "$* needs update:";                                                \
+		diff -du0 "$${CT_NG_SAMPLE}" .defconfig |tail -n +4;                    \
+	    fi;                                                                         \
 	 fi
 	@rm -f .config.sample* .defconfig
 
 check-samples: $(patsubst %,check-%,$(CT_SAMPLES))
+
+update-samples:
+	$(SILENT)$(MAKE) -rf $(CT_NG) check-samples CT_UPDATE_SAMPLES=yes
 
 PHONY += wiki-samples
 wiki-samples: wiki-samples-pre $(patsubst %,wiki-%,$(CT_SAMPLES)) wiki-samples-post
@@ -105,11 +117,11 @@ wiki-samples-pre: FORCE
 wiki-samples-post: FORCE
 	$(SILENT)$(CT_LIB_DIR)/scripts/showSamples.sh -W $(CT_SAMPLES)
 
-$(patsubst %,wiki-%,$(CT_SAMPLES)): config_files
+$(patsubst %,wiki-%,$(CT_SAMPLES)): wiki-%: config_files
 	$(SILENT)KCONFIG_CONFIG=$$(pwd)/.config.sample	\
-	    $(CONF) --defconfig=$(call sample_dir,$(patsubst wiki-%,%,$(@)))/crosstool.config   \
+	    $(CONF) --defconfig=$(call sample_dir,$*)/crosstool.config   \
 	            $(KCONFIG_TOP) >/dev/null
-	$(SILENT)$(CT_LIB_DIR)/scripts/showSamples.sh -w $(patsubst wiki-%,%,$(@))
+	$(SILENT)$(CT_LIB_DIR)/scripts/showSamples.sh -w $*
 	$(SILENT)rm -f .config.sample
 
 # ----------------------------------------------------------
@@ -117,7 +129,7 @@ $(patsubst %,wiki-%,$(CT_SAMPLES)): config_files
 
 PHONY += samples
 samples:
-	@$(ECHO) '  MKDIR $@'
+	@$(CT_ECHO) '  MKDIR $@'
 	$(SILENT)mkdir -p $@
 
 # Save a sample
@@ -133,7 +145,7 @@ endef
 # How we do recall one sample
 PHONY += $(CT_SAMPLES)
 $(CT_SAMPLES): config_files
-	@$(ECHO) "  CONF  $(KCONFIG_TOP)"
+	@$(CT_ECHO) "  CONF  $(KCONFIG_TOP)"
 	$(SILENT)$(CONF) --defconfig=$(call sample_dir,$@)/crosstool.config $(KCONFIG_TOP)
 	@echo
 	@echo  '***********************************************************'
@@ -164,21 +176,41 @@ $(CT_SAMPLES): config_files
 # ----------------------------------------------------------
 # Some helper functions
 
+# Construct a CT_PREFIX_DIR path from the sample name. Sample names use
+# comma as a separator between host and target triplets in canadian cross
+# configurations, but ct-ng does not allow commas in the path. Substitute
+# with = (equal sign).
+# $1: sample
+__comma = ,
+prefix_dir = $(CT_PREFIX)/$(subst $(__comma),=,$(1))
+host_triplet = $(if $(findstring $(__comma),$(1)),$(firstword $(subst $(__comma), ,$(1))))
+
 # Create the rule to build a sample
-# $1: sample tuple
-# $2: prefix
+# $1: sample name (target tuple, or host/target tuples separated by a comma)
 define build_sample
-	@$(ECHO) '  CONF  $(1)'
-	$(SILENT)cp $(call sample_dir,$(1))/crosstool.config .config
-	$(SILENT)$(sed) -i -r -e 's:^(CT_PREFIX_DIR=).*$$:\1"$(2)":;' .config
+	@$(CT_ECHO) '  CONF  $(1)'
+	$(SILENT)$(CONF) -s --defconfig=$(call sample_dir,$(1))/crosstool.config $(KCONFIG_TOP)
+	$(SILENT)$(sed) -i -r -e 's:^(CT_PREFIX_DIR=).*$$:\1"$(call prefix_dir,$(1))":;' .config
 	$(SILENT)$(sed) -i -r -e 's:^.*(CT_LOG_(WARN|INFO|EXTRA|DEBUG|ALL)).*$$:# \1 is not set:;' .config
 	$(SILENT)$(sed) -i -r -e 's:^.*(CT_LOG_ERROR).*$$:\1=y:;' .config
 	$(SILENT)$(sed) -i -r -e 's:^(CT_LOG_LEVEL_MAX)=.*$$:\1="ERROR":;' .config
 	$(SILENT)$(sed) -i -r -e 's:^.*(CT_LOG_TO_FILE).*$$:\1=y:;' .config
 	$(SILENT)$(sed) -i -r -e 's:^.*(CT_LOG_PROGRESS_BAR).*$$:\1=y:;' .config
-	$(SILENT)$(MAKE) -rf $(CT_NG) V=0 oldconfig
-	@$(ECHO) '  BUILD $(1)'
-	$(SILENT)$(MAKE) -rf $(CT_NG) V=0 build
+	$(SILENT)$(CONF) -s --oldconfig $(KCONFIG_TOP)
+	@$(CT_ECHO) '  BUILD $(1)'
+	$(SILENT)if [ ! -z "$(call host_triplet,$(1))" -a -d "$(call prefix_dir,$(call host_triplet,$(1)))" ]; then \
+		PATH="$$PATH:$(call prefix_dir,$(call host_triplet,$(1)))/bin"; \
+	fi; \
+	if $(MAKE) -rf $(CT_NG) V=0 build; then \
+		status=PASS; \
+	elif [ -e $(call sample_dir,$(1))/broken ]; then \
+		status=XFAIL; \
+	else \
+		status=FAIL; \
+	fi; \
+	printf '\r  %-5s %s\n' $$status '$(1)'; \
+	mkdir -p .build-all/$$status/$(1); \
+	bzip2 < build.log > .build-all/$$status/$(1)/build.log.bz2
 endef
 
 # ----------------------------------------------------------
@@ -196,13 +228,39 @@ endif # MAKECMDGOALS contains a build sample rule
 endif # MAKECMDGOALS != ""
 
 # Build a single sample
-$(patsubst %,build-%,$(CT_SAMPLES)):
-	$(call build_sample,$(patsubst build-%,%,$@),$(CT_PREFIX)/$(patsubst build-%,%,$@))
+$(patsubst %,build-%,$(CT_SAMPLES)): build-%: config_files
+	$(call build_sample,$*)
 
-# Build al samples
-build-all: $(patsubst %,build-%,$(CT_SAMPLES))
+# Cross samples (build==host)
+CT_SAMPLES_CROSS = $(strip $(foreach s,$(CT_SAMPLES),$(if $(findstring $(__comma),$(s)),, $(s))))
+# Canadian cross (build!=host)
+CT_SAMPLES_CANADIAN = $(strip $(foreach s,$(CT_SAMPLES),$(if $(findstring $(__comma),$(s)), $(s),)))
+
+# Build all samples; first, build simple cross as canadian configurations may depend on
+# build-to-host cross being pre-built.
+build-all: build-all-pre $(patsubst %,build-%,$(CT_SAMPLES_CROSS) $(CT_SAMPLES_CANADIAN))
+	@echo
+	@if [ -d .build-all/PASS ]; then \
+		echo 'Success:'; \
+		(cd .build-all/PASS && ls | sed 's/^/  - /'); \
+		echo; \
+	fi
+	@if [ -d .build-all/XFAIL ]; then \
+		echo 'Expected failure:'; \
+		(cd .build-all/XFAIL && ls | sed 's/^/  - /'); \
+		echo; \
+	fi
+	@if [ -d .build-all/FAIL ]; then \
+		echo 'Failure:'; \
+		(cd .build-all/FAIL && ls | sed 's/^/  - /'); \
+		echo; \
+	fi
+	@[ ! -d .build-all/FAIL ]
+
+build-all-pre:
+	@rm -rf .build-all
 
 # Build all samples, overiding the number of // jobs per sample
 build-all.%:
-	$(SILENT)$(MAKE) -rf $(CT_NG) V=$(V) $(shell echo "$(@)" |$(sed) -r -e 's|^([^.]+)\.([[:digit:]]+)$$|\1 CT_JOBS=\2|;')
+	$(SILENT)$(MAKE) -rf $(CT_NG) build-all CT_JOBS=$*
 

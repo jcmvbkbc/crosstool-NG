@@ -25,6 +25,11 @@ choice
 # Don't remove next line
 # CT_INSERT_VERSION_BELOW
 
+config BINUTILS_V_2_25_1
+    bool
+    prompt "2.25.1"
+    select BINUTILS_2_25_1_or_later
+
 config BINUTILS_LINARO_V_2_25
     bool
     prompt "linaro-2.25.0-2015.01-2"
@@ -87,13 +92,12 @@ config BINUTILS_V_2_18a
     prompt "2.18a"
     select BINUTILS_2_18_or_later
 
+endchoice
+
 config BINUTILS_CUSTOM
     bool
     prompt "Custom binutils"
     depends on EXPERIMENTAL
-    select BINUTILS_2_22_or_later
-
-endchoice
 
 if BINUTILS_CUSTOM
 
@@ -111,6 +115,7 @@ config BINUTILS_VERSION
     string
 # Don't remove next line
 # CT_INSERT_VERSION_STRING_BELOW
+    default "2.25.1" if BINUTILS_V_2_25_1
     default "linaro-2.25.0-2015.01-2" if BINUTILS_LINARO_V_2_25
     default "2.25" if BINUTILS_V_2_25
     default "linaro-2.24.0-2014.11-2" if BINUTILS_LINARO_V_2_24
@@ -123,7 +128,10 @@ config BINUTILS_VERSION
     default "2.20.1a" if BINUTILS_V_2_20_1a
     default "2.19.1a" if BINUTILS_V_2_19_1a
     default "2.18a" if BINUTILS_V_2_18a
-    default "custom" if BINUTILS_CUSTOM
+
+config BINUTILS_2_25_1_or_later
+    bool
+    select BINUTILS_2_25_or_later
 
 config BINUTILS_2_25_or_later
     bool
@@ -172,6 +180,13 @@ config BINUTILS_GOLD_SUPPORTS_ARCH
     default y if ARCH_arm
     default y if ARCH_x86
 
+config BINUTILS_GOLD_SUPPORT
+    bool
+    default y
+    depends on BINUTILS_HAS_GOLD
+    depends on BINUTILS_GOLD_SUPPORTS_ARCH
+    depends on ! STATIC_TOOLCHAIN
+
 config BINUTILS_HAS_PLUGINS
     bool
 
@@ -197,8 +212,7 @@ config BINUTILS_LINKER_LD
 config BINUTILS_LINKER_GOLD
     bool
     prompt "gold"
-    depends on BINUTILS_HAS_GOLD
-    depends on BINUTILS_GOLD_SUPPORTS_ARCH
+    depends on BINUTILS_GOLD_SUPPORT
     depends on ! BINUTILS_FORCE_LD_BFD
     select BINUTILS_GOLD_INSTALLED
     help
@@ -210,8 +224,7 @@ config BINUTILS_LINKER_GOLD
 config BINUTILS_LINKER_LD_GOLD
     bool
     prompt "ld, gold"
-    depends on BINUTILS_HAS_GOLD
-    depends on BINUTILS_GOLD_SUPPORTS_ARCH
+    depends on BINUTILS_GOLD_SUPPORT
     select BINUTILS_GOLD_INSTALLED
     select BINUTILS_LINKER_BOTH
     help
@@ -223,8 +236,7 @@ config BINUTILS_LINKER_LD_GOLD
 config BINUTILS_LINKER_GOLD_LD
     bool
     prompt "gold, ld"
-    depends on BINUTILS_HAS_GOLD
-    depends on BINUTILS_GOLD_SUPPORTS_ARCH
+    depends on BINUTILS_GOLD_SUPPORT
     select BINUTILS_GOLD_INSTALLED
     select BINUTILS_LINKER_BOTH
     select BINUTILS_LD_WRAPPER if BINUTILS_FORCE_LD_BFD

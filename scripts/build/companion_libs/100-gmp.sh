@@ -6,6 +6,7 @@ do_gmp_get() { :; }
 do_gmp_extract() { :; }
 do_gmp_for_build() { :; }
 do_gmp_for_host() { :; }
+do_gmp_for_target() { :; }
 
 # Overide functions depending on configuration
 if [ "${CT_GMP}" = "y" ]; then
@@ -102,15 +103,15 @@ do_gmp_backend() {
         "${extra_config}"
 
     CT_DoLog EXTRA "Building GMP"
-    CT_DoExecLog ALL make ${JOBSFLAGS}
+    CT_DoExecLog ALL ${make} ${JOBSFLAGS}
 
     if [ "${CT_COMPLIBS_CHECK}" = "y" ]; then
         CT_DoLog EXTRA "Checking GMP"
-        CT_DoExecLog ALL make ${JOBSFLAGS} -s check
+        CT_DoExecLog ALL ${make} ${JOBSFLAGS} -s check
     fi
 
     CT_DoLog EXTRA "Installing GMP"
-    CT_DoExecLog ALL make install
+    CT_DoExecLog ALL ${make} install
 }
 
 fi # CT_GMP

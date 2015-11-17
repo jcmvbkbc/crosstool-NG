@@ -7,7 +7,7 @@
 ## help The xtensa architecture
 ## help
 ## help    Xtensa is a configurable and extensible processor architecture.
-## help    Supporting a specific configuration typically requires minor 
+## help    Supporting a specific configuration typically requires minor
 ## help    modifications to a small set of configuration files in various
 ## help    development tools. This process is automated and only requires
 ## help    a configuration specific 'overlay' file.

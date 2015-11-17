@@ -23,10 +23,16 @@ dump_single_sample() {
     [ "$1" = "-v" ] && verbose=1 && shift
     [ "$1" = "-w" ] && wiki=1 && shift
     local sample="$1"
+    . $(pwd)/.config.sample
     case "${sample}" in
         current)
             sample_type="l"
             sample="$( ${CT_NG} show-tuple )"
+            case "${CT_TOOLCHAIN_TYPE}" in
+                canadian)
+                    sample="${CT_HOST},$sample"
+                    ;;
+            esac
             ;;
         *)  if [ -f "${CT_TOP_DIR}/samples/${sample}/crosstool.config" ]; then
                 sample_top="${CT_TOP_DIR}"
@@ -37,7 +43,6 @@ dump_single_sample() {
             fi
             ;;
     esac
-    . $(pwd)/.config.sample
     if [ ${wiki} -eq 0 ]; then
         width=14
         printf "[%s" "${sample_type}"
@@ -58,25 +63,39 @@ dump_single_sample() {
                  -o -n "${CT_CLOOG}"            \
                  -o -n "${CT_MPC}"              \
                  -o -n "${CT_LIBELF}"           \
+                 -o -n "${CT_EXPAT}"            \
+                 -o -n "${CT_NCURSES}"          \
                  -o -n "${CT_GMP_TARGET}"       \
                  -o -n "${CT_MPFR_TARGET}"      \
                  -o -n "${CT_PPL_TARGET}"       \
                  -o -n "${CT_CLOOG_TARGET}"     \
                  -o -n "${CT_MPC_TARGET}"       \
                  -o -n "${CT_LIBELF_TARGET}"    \
+                 -o -n "${CT_EXPAT_TARGET}"     \
+                 -o -n "${CT_NCURSES_TARGET}"   \
                ]; then
                 printf "    %-*s :" ${width} "Companion libs"
                 complibs=1
             fi
-            [ -z "${CT_GMP}"    -a -z "${CT_GMP_TARGET}"    ] || printf " gmp-%s"       "${CT_GMP_VERSION}"
-            [ -z "${CT_MPFR}"   -a -z "${CT_MPFR_TARGET}"   ] || printf " mpfr-%s"      "${CT_MPFR_VERSION}"
-            [ -z "${CT_PPL}"    -a -z "${CT_PPL_TARGET}"    ] || printf " ppl-%s"       "${CT_PPL_VERSION}"
-            [ -z "${CT_CLOOG}"  -a -z "${CT_CLOOG_TARGET}"  ] || printf " cloog-ppl-%s" "${CT_CLOOG_VERSION}"
-            [ -z "${CT_MPC}"    -a -z "${CT_MPC_TARGET}"    ] || printf " mpc-%s"       "${CT_MPC_VERSION}"
-            [ -z "${CT_LIBELF}" -a -z "${CT_LIBELF_TARGET}" ] || printf " libelf-%s"    "${CT_LIBELF_VERSION}"
+            [ -z "${CT_GMP}"     -a -z "${CT_GMP_TARGET}"     ] || printf " gmp-%s"       "${CT_GMP_VERSION}"
+            [ -z "${CT_MPFR}"    -a -z "${CT_MPFR_TARGET}"    ] || printf " mpfr-%s"      "${CT_MPFR_VERSION}"
+            [ -z "${CT_PPL}"     -a -z "${CT_PPL_TARGET}"     ] || printf " ppl-%s"       "${CT_PPL_VERSION}"
+            [ -z "${CT_CLOOG}"   -a -z "${CT_CLOOG_TARGET}"   ] || printf " cloog-ppl-%s" "${CT_CLOOG_VERSION}"
+            [ -z "${CT_MPC}"     -a -z "${CT_MPC_TARGET}"     ] || printf " mpc-%s"       "${CT_MPC_VERSION}"
+            [ -z "${CT_LIBELF}"  -a -z "${CT_LIBELF_TARGET}"  ] || printf " libelf-%s"    "${CT_LIBELF_VERSION}"
+            [ -z "${CT_EXPAT}"   -a -z "${CT_EXPAT_TARGET}"   ] || printf " expat-%s"     "${CT_EXPAT_VERSION}"
+            [ -z "${CT_NCURSES}" -a -z "${CT_NCURSES_TARGET}" ] || printf " ncurses-%s"   "${CT_NCURSES_VERSION}"
             [ -z "${complibs}"  ] || printf "\n"
             printf  "    %-*s : %s\n" ${width} "binutils" "binutils-${CT_BINUTILS_VERSION}"
-            printf  "    %-*s : %s" ${width} "C compiler" "${CT_CC}-${CT_CC_VERSION} (C"
+            printf  "    %-*s :" ${width} "C compilers"
+            for cc in $(env | ${sed} -n 's/^CT_CC_\(.*\)_VERSION.*/\1/p'); do
+                cc_variable=CT_CC_${cc}_VERSION
+                version=${!cc_variable}
+                compiler=$(echo $cc | ${awk} '{print tolower($0)}')
+                printf " $compiler-$version"
+            done
+            printf "\n"
+            printf  "    %-*s : %s" ${width} "Languages" "C"
             [ "${CT_CC_LANG_CXX}" = "y"     ] && printf ",C++"
             [ "${CT_CC_LANG_FORTRAN}" = "y" ] && printf ",Fortran"
             [ "${CT_CC_LANG_JAVA}" = "y"    ] && printf ",Java"
@@ -85,7 +104,7 @@ dump_single_sample() {
             [ "${CT_CC_LANG_OBJCXX}" = "y"  ] && printf ",Objective-C++"
             [ "${CT_CC_LANG_GOLANG}" = "y"  ] && printf ",Go"
             [ -n "${CT_CC_LANG_OTHERS}"     ] && printf ",${CT_CC_LANG_OTHERS}"
-            printf ")\n"
+            printf "\n"
             printf  "    %-*s : %s (threads: %s)\n" ${width} "C library" "${CT_LIBC}${CT_LIBC_VERSION:+-}${CT_LIBC_VERSION}" "${CT_THREADS}"
             printf  "    %-*s :" ${width} "Tools"
             [ "${CT_TOOL_sstrip}"   ] && printf " sstrip"
@@ -120,8 +139,14 @@ dump_single_sample() {
             fi
         fi
         printf "|  ${CT_BINUTILS_VERSION}  "
-        printf "|  ''${CT_CC}''  "
-        printf "|  ${CT_CC_VERSION}  "
+        printf "| "
+        for cc in $(env | ${sed} -n 's/^CT_CC_\(.*\)_VERSION.*/\1/p'); do
+            cc_variable=CT_CC_${cc}_VERSION
+            version=${!cc_variable}
+            compiler=$(echo $cc | ${awk} '{print tolower($0)}')
+            printf " $compiler-$version"
+         done
+        printf "  "
         printf "|  ''${CT_LIBC}''  |"
         if [ "${CT_LIBC}" != "none" ]; then
             printf "  ${CT_LIBC_VERSION}  "

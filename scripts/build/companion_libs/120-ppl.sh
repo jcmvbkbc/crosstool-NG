@@ -6,6 +6,7 @@ do_ppl_get() { :; }
 do_ppl_extract() { :; }
 do_ppl_for_build() { :; }
 do_ppl_for_host() { :; }
+do_ppl_for_target() { :; }
 
 # Overide functions depending on configuration
 if [ "${CT_PPL}" = "y" ]; then
@@ -126,15 +127,15 @@ do_ppl_backend() {
     # --enable-optimization=speed  or sspeed (yes, with 2 's')
 
     CT_DoLog EXTRA "Building PPL"
-    CT_DoExecLog ALL make ${JOBSFLAGS}
+    CT_DoExecLog ALL ${make} ${JOBSFLAGS}
 
     if [ "${CT_COMPLIBS_CHECK}" = "y" ]; then
         CT_DoLog EXTRA "Checking PPL"
-        CT_DoExecLog ALL make ${JOBSFLAGS} -s check
+        CT_DoExecLog ALL ${make} ${JOBSFLAGS} -s check
     fi
 
     CT_DoLog EXTRA "Installing PPL"
-    CT_DoExecLog ALL make install
+    CT_DoExecLog ALL ${make} install
 
     # Remove spuriously installed file
     CT_DoExecLog ALL rm -f "${prefix}/bin/ppl-config"

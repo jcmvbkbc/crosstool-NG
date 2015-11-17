@@ -8,6 +8,7 @@ config ARCH
 # Pre-declare target optimisation variables
 config ARCH_SUPPORTS_BOTH_MMU
 config ARCH_SUPPORTS_BOTH_ENDIAN
+config ARCH_SUPPORTS_8
 config ARCH_SUPPORTS_32
 config ARCH_SUPPORTS_64
 config ARCH_SUPPORTS_WITH_ARCH
@@ -60,6 +61,10 @@ config ARCH_SUFFIX
 comment "Generic target options"
 
 #--------------------------------------
+config ARCH_REQUIRES_MULTILIB
+    bool
+    select MULTILIB
+
 config MULTILIB
     bool
     prompt "Build a multilib toolchain (READ HELP!!!)"
@@ -133,10 +138,16 @@ config ARCH_ENDIAN
     default "little"    if ARCH_LE
 
 #--------------------------------------
+config ARCH_SUPPORTS_8
+    bool
+
 config ARCH_SUPPORTS_32
     bool
 
 config ARCH_SUPPORTS_64
+    bool
+
+config ARCH_DEFAULT_8
     bool
 
 config ARCH_DEFAULT_32
@@ -147,14 +158,21 @@ config ARCH_DEFAULT_64
 
 config ARCH_BITNESS
     int
+    default "8"     if ARCH_8
     default "32"    if ARCH_32
     default "64"    if ARCH_64
 
 choice
     bool
     prompt "Bitness:"
+    default ARCH_8  if ARCH_DEFAULT_8
     default ARCH_32 if ARCH_DEFAULT_32
     default ARCH_64 if ARCH_DEFAULT_64
+
+config ARCH_8
+    bool
+    prompt "8-bit"
+    depends on ARCH_SUPPORTS_8
 
 config ARCH_32
     bool
@@ -192,10 +210,14 @@ config ARCH_SUPPORTS_WITH_FPU
 config ARCH_SUPPORTS_SOFTFP
     bool
 
+config ARCH_EXCLUSIVE_WITH_CPU
+    bool
+
 config ARCH_ARCH
     string
     prompt "Architecture level"
     depends on ARCH_SUPPORTS_WITH_ARCH
+    depends on !ARCH_EXCLUSIVE_WITH_CPU || ARCH_CPU = ""
     default ""
     help
       GCC uses this name to determine what kind of instructions it can emit
@@ -252,6 +274,7 @@ config ARCH_TUNE
     string
     prompt "Tune for CPU"
     depends on ARCH_SUPPORTS_WITH_TUNE
+    depends on !ARCH_EXCLUSIVE_WITH_CPU || ARCH_CPU = ""
     default ""
     help
       This option is very similar to the ARCH_CPU option (above), except

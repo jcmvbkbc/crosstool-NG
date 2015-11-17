@@ -143,7 +143,7 @@ CT_DoLog INFO "Building environment variables"
 . "${CT_LIB_DIR}/scripts/build/companion_libs.sh"
 . "${CT_LIB_DIR}/scripts/build/binutils/${CT_BINUTILS}.sh"
 . "${CT_LIB_DIR}/scripts/build/libc/${CT_LIBC}.sh"
-. "${CT_LIB_DIR}/scripts/build/cc/${CT_CC}.sh"
+. "${CT_LIB_DIR}/scripts/build/cc.sh"
 . "${CT_LIB_DIR}/scripts/build/debug.sh"
 . "${CT_LIB_DIR}/scripts/build/test_suite.sh"
 
@@ -165,8 +165,8 @@ CT_PREFIX_DIR="$( "${sed}" -r -e 's:/+:/:g; s:/*$::;' <<<"${CT_PREFIX_DIR}" )"
 # Put user-supplied flags at the end, so that they take precedence.
 CT_TARGET_CFLAGS="${CT_ARCH_TARGET_CFLAGS} ${CT_TARGET_CFLAGS}"
 CT_TARGET_LDFLAGS="${CT_ARCH_TARGET_LDFLAGS} ${CT_TARGET_LDFLAGS}"
-CT_CC_CORE_EXTRA_CONFIG_ARRAY=( ${CT_ARCH_CC_CORE_EXTRA_CONFIG} "${CT_CC_CORE_EXTRA_CONFIG_ARRAY[@]}" )
-CT_CC_EXTRA_CONFIG_ARRAY=( ${CT_ARCH_CC_EXTRA_CONFIG} "${CT_CC_EXTRA_CONFIG_ARRAY[@]}" )
+CT_CC_GCC_CORE_EXTRA_CONFIG_ARRAY=( ${CT_ARCH_CC_CORE_EXTRA_CONFIG} "${CT_CC_GCC_CORE_EXTRA_CONFIG_ARRAY[@]}" )
+CT_CC_GCC_EXTRA_CONFIG_ARRAY=( ${CT_ARCH_CC_EXTRA_CONFIG} "${CT_CC_GCC_EXTRA_CONFIG_ARRAY[@]}" )
 
 # Compute the package version string
 CT_PKGVERSION="crosstool-NG ${CT_VERSION}${CT_TOOLCHAIN_PKGVERSION:+ - ${CT_TOOLCHAIN_PKGVERSION}}"
@@ -458,7 +458,7 @@ if [ -z "${CT_RESTART}" ]; then
                         CT_TestAndAbort "Missing: '${t}${tool}${!s}' or '${t}${tool}' or '${tool}' : either needed!" "${CT_CC_LANG_JAVA}" = "y"
                         ;;
                     strip)
-                        CT_TestAndAbort "Missing: '${t}${tool}${!s}' or '${t}${tool}' or '${tool}' : either needed!" "${CT_STRIP_ALL_TOOLCHAIN_EXECUTABLES}" = "y"
+                        CT_TestAndAbort "Missing: '${t}${tool}${!s}' or '${t}${tool}' or '${tool}' : either needed!" "${CT_STRIP_HOST_TOOLCHAIN_EXECUTABLES}" = "y"
                         ;;
                     # If any other is missing, only warn at low level
                     *)
@@ -516,13 +516,21 @@ if [ -z "${CT_RESTART}" ]; then
     # And help make go faster
     JOBSFLAGS=
     # Override the configured jobs with what's been given on the command line
-    [ -n "${CT_JOBS}" ] && CT_PARALLEL_JOBS="${CT_JOBS}"
+    if [ -n "${CT_JOBS}" ]; then
+        if [ ! -z "`echo "${CT_JOBS}" | ${sed} 's/[0-9]//g'`" ]; then
+            CT_Abort "Number of parallel jobs must be integer."
+        fi
+        CT_PARALLEL_JOBS="${CT_JOBS}"
+    fi
     # Use the number of processors+1 when automatically setting the number of
     # parallel jobs.  Fall back to 1 if the host doesn't use GLIBC.
     AUTO_JOBS=$((`getconf _NPROCESSORS_ONLN 2> /dev/null || echo 0` + 1))
     [ ${CT_PARALLEL_JOBS} -eq 0 ] && JOBSFLAGS="${JOBSFLAGS} -j${AUTO_JOBS}"
     [ ${CT_PARALLEL_JOBS} -gt 0 ] && JOBSFLAGS="${JOBSFLAGS} -j${CT_PARALLEL_JOBS}"
     JOBSFLAGS="${JOBSFLAGS} -l${CT_LOAD}"
+
+    # Override 'download only' option
+    [ -n "${CT_SOURCE}" ] && CT_ONLY_DOWNLOAD=y
 
     # Now that we've set up $PATH and $CT_CFLAGS_FOR_HOST, sanity test that gcc
     # is runnable so that the user can troubleshoot problems if not.
@@ -548,8 +556,8 @@ if [ -z "${CT_RESTART}" ]; then
         CT_EndStep
     fi
 
-    if [ "${CT_CC_STATIC_LIBSTDCXX}" = "y" ]; then
-        CT_DoStep DEBUG "Checking that gcc can statically link libstdc++ (CT_CC_STATIC_LIBSTDCXX)"
+    if [ "${CT_CC_GCC_STATIC_LIBSTDCXX}" = "y" ]; then
+        CT_DoStep DEBUG "Checking that gcc can statically link libstdc++ (CT_CC_GCC_STATIC_LIBSTDCXX)"
         CT_DoLog DEBUG "You may need to ensure that libstdc++.a is installed on your system"
         CT_DoExecLog DEBUG "${CT_HOST}-gcc" ${CT_CFLAGS_FOR_HOST} ${CT_LDFLAGS_FOR_HOST} "${testc}" -static -lstdc++ -o "${gccout}"
         rm -f "${gccout}"
@@ -561,7 +569,7 @@ if [ -z "${CT_RESTART}" ]; then
     # not our mangled .config.2 with arrays.
     CT_DoLog EXTRA "Installing user-supplied crosstool-NG configuration"
     CT_DoExecLog ALL mkdir -p "${CT_PREFIX_DIR}/bin"
-    CT_DoExecLog DEBUG install -m 0755 "${CT_LIB_DIR}/scripts/toolchain-config.in" "${CT_PREFIX_DIR}/bin/${CT_TARGET}-ct-ng.config"
+    CT_DoExecLog DEBUG ${install} -m 0755 "${CT_LIB_DIR}/scripts/toolchain-config.in" "${CT_PREFIX_DIR}/bin/${CT_TARGET}-ct-ng.config"
     CT_DoExecLog DEBUG ${sed} -i -e 's,@@grep@@,"'"${grep}"'",;' "${CT_PREFIX_DIR}/bin/${CT_TARGET}-ct-ng.config"
     bzip2 -c -9 .config >>"${CT_PREFIX_DIR}/bin/${CT_TARGET}-ct-ng.config"
 

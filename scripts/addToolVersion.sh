@@ -17,7 +17,8 @@ doHelp() {
 		Usage: ${myname} <--tool> <[options] version [...]> ...
 		  'tool' in one of:
 		    gcc, binutils, glibc, uClibc, newlib, linux, gdb, dmalloc,
-		    duma, strace, ltrace, libelf, gmp, mpfr, ppl, cloog, mpc
+		    duma, strace, ltrace, libelf, gmp, mpfr, ppl, cloog, mpc,
+		    mingw-w64, expat, ncurses
 		
 		  Valid options for all tools:
 		    --stable, -s, +x   (default)
@@ -132,15 +133,12 @@ addToolVersion() {
             fi
             ;;
         uClibc)
-            # uClibc-0.9.30 and above need some love
+            # uClibc-0.9.33.2 needs some love
             ver_M=$(getVersionField "${version}" . 1)
             ver_m=$(getVersionField "${version}" . 2)
             ver_p=$(getVersionField "${version}" . 3)
-            if [    ${ver_M} -eq 0 -a ${ver_m} -eq 9 -a ${ver_p} -eq 30 \
-                 -o ${ver_M} -eq 0 -a ${ver_m} -eq 9 -a ${ver_p} -eq 31 ]; then
-                SedExpr1="${SedExpr1}\n    select LIBC_UCLIBC_0_9_30_or_later"
-            elif [  ${ver_M} -eq 0 -a ${ver_m} -eq 9 -a ${ver_p} -eq 32 ]; then
-                SedExpr1="${SedExpr1}\n    select LIBC_UCLIBC_0_9_32_or_later"
+            elif [  ${ver_M} -eq 0 -a ${ver_m} -eq 9 -a ${ver_p} -eq 33 ]; then
+                SedExpr1="${SedExpr1}\n    select LIBC_UCLIBC_0_9_33_2_or_later"
             fi
             ;;
         gdb)
@@ -175,11 +173,12 @@ fi
 while [ $# -gt 0 ]; do
     case "$1" in
         # Tools:
-        --gcc)      EXP=; OBS=; cat=CC;             tool=gcc;       tool_prefix=cc;             dot2suffix=;;
+        --gcc)      EXP=; OBS=; cat=CC_GCC;         tool=gcc;       tool_prefix=cc;             dot2suffix=;;
         --binutils) EXP=; OBS=; cat=BINUTILS;       tool=binutils;  tool_prefix=binutils;       dot2suffix=;;
         --glibc)    EXP=; OBS=; cat=LIBC_GLIBC;     tool=glibc;     tool_prefix=libc;           dot2suffix=;;
         --uClibc)   EXP=; OBS=; cat=LIBC_UCLIBC;    tool=uClibc;    tool_prefix=libc;           dot2suffix=;;
         --newlib)   EXP=; OBS=; cat=LIBC_NEWLIB;    tool=newlib;    tool_prefix=libc;           dot2suffix=;;
+        --mingw-w64)EXP=; OBS=; cat=WINAPI;         tool=mingw;     tool_prefix=libc;           dot2suffix=;;
         --linux)    EXP=; OBS=; cat=KERNEL;         tool=linux;     tool_prefix=kernel;         dot2suffix=;;
         --gdb)      EXP=; OBS=; cat=GDB;            tool=gdb;       tool_prefix=debug;          dot2suffix=;;
         --dmalloc)  EXP=; OBS=; cat=DMALLOC;        tool=dmalloc;   tool_prefix=debug;          dot2suffix=;;
@@ -192,6 +191,8 @@ while [ $# -gt 0 ]; do
         --cloog)    EXP=; OBS=; cat=CLOOG;          tool=cloog;     tool_prefix=companion_libs; dot2suffix=;;
         --mpc)      EXP=; OBS=; cat=MPC;            tool=mpc;       tool_prefix=companion_libs; dot2suffix=;;
         --libelf)   EXP=; OBS=; cat=LIBELF;         tool=libelf;    tool_prefix=companion_libs; dot2suffix=;;
+        --expat)    EXP=; OBS=; cat=EXPAT;          tool=expat;     tool_prefix=companion_libs; dot2suffix=;;
+        --ncurses)  EXP=; OBS=; cat=NCURSES;        tool=ncurses;   tool_prefix=companion_libs; dot2suffix=;;
 
         # Tools options:
         -x|--experimental|+s)   EXP=1;;

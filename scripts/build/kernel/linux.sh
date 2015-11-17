@@ -7,10 +7,9 @@ CT_DoKernelTupleValues() {
         CT_TARGET_KERNEL="linux"
     else
         # Some no-mmu linux targets requires a -uclinux tuple (like m68k/cf),
-        # while others must have a -linux tuple (like bfin).  Other targets
+        # while others must have a -linux tuple.  Other targets
         # should be added here when someone starts to care about them.
         case "${CT_ARCH}" in
-            blackfin)   CT_TARGET_KERNEL="linux" ;;
             m68k)       CT_TARGET_KERNEL="uclinux" ;;
             *)          CT_Abort "Unsupported no-mmu arch '${CT_ARCH}'"
         esac
@@ -35,7 +34,7 @@ do_kernel_get() {
         case "${CT_KERNEL_VERSION}" in
             2.6.*.*|3.*.*|4.*.*)
                 # 4-part versions (for 2.6 stables and long-terms), and
-                # 3-part versions (for 3.x.y and 4.x.y stables and long-terms),
+                # 3-part versions (for 3.x.y and 4.x.y stables and long-terms)
                 # we need to trash the last digit
                 k_ver="${CT_KERNEL_VERSION%.*}"
                 ;;
@@ -118,7 +117,8 @@ do_kernel_install() {
 
     CT_DoLog EXTRA "Installing kernel headers"
     CT_DoExecLog ALL                                    \
-    make -C "${kernel_path}"                            \
+    ${make} -C "${kernel_path}"                         \
+         CROSS_COMPILE="${CT_TARGET}-"                  \
          O="${CT_BUILD_DIR}/build-kernel-headers"       \
          ARCH=${kernel_arch}                            \
          INSTALL_HDR_PATH="${CT_SYSROOT_DIR}/usr"       \
@@ -128,7 +128,8 @@ do_kernel_install() {
     if [ "${CT_KERNEL_LINUX_INSTALL_CHECK}" = "y" ]; then
         CT_DoLog EXTRA "Checking installed headers"
         CT_DoExecLog ALL                                    \
-        make -C "${kernel_path}"                            \
+        ${make} -C "${kernel_path}"                         \
+             CROSS_COMPILE="${CT_TARGET}-"                  \
              O="${CT_BUILD_DIR}/build-kernel-headers"       \
              ARCH=${kernel_arch}                            \
              INSTALL_HDR_PATH="${CT_SYSROOT_DIR}/usr"       \

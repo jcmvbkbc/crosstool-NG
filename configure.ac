@@ -2,7 +2,10 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.67])
-AC_INIT([crosstool-NG], [m4_esyscmd_s([cat .version])], [crossgcc@sourceware.org])
+AC_INIT(
+    [crosstool-NG],
+    [m4_esyscmd_s([git describe --always --dirty])],
+    [crossgcc@sourceware.org])
 AC_CONFIG_AUX_DIR([scripts])
 
 #--------------------------------------------------------------------
@@ -168,11 +171,12 @@ ACX_CHECK_PROGS_REQ([wget], [wget])
 ACX_CHECK_PROGS_REQ([tar], [tar])
 ACX_CHECK_PROGS_REQ([gzip], [gzip])
 ACX_CHECK_PROGS_REQ([bzip2], [bzip2])
+ACX_CHECK_PROGS_REQ([help2man], [help2man])
 
 #--------------------------------------------------------------------
 # Still boring, but remember the path, now...
 #--------------------------------------------------------------------
-ACX_PATH_PROGS_REQ([PATCH], [patch])
+ACX_PATH_TOOL_REQ([PATCH], [gpatch patch])
 
 #--------------------------------------------------------------------
 # And a bunch of less boring tests...
@@ -317,7 +321,7 @@ AC_FUNC_REALLOC
 AC_FUNC_ALLOCA
 
 #----------------------------------------
-# Check for gettext, for the kconfig frontends
+# Check for gettext and libintl for the kconfig frontends
 AC_SUBST([gettext])
 AC_CHECK_HEADERS(
     [libintl.h],
@@ -329,6 +333,10 @@ AS_IF(
         [gettext=y],,
         [AC_INCLUDES_DEFAULT()
          #include <$ac_ct_gettext_hdr>])])
+SAVE_LIBS=$LIBS
+AC_SEARCH_LIBS(bindtextdomain, intl, [test "$ac_res" = "none required" || INTL_LIBS="${ac_res}"])
+LIBS=$SAVE_LIBS
+AC_SUBST([INTL_LIBS])
 
 #----------------------------------------
 # Check for ncurses, for the kconfig frontends
@@ -346,6 +354,9 @@ AC_SEARCH_LIBS(
 AS_IF(
     [test -z "$ac_ct_curses_lib_found"],
     [AC_MSG_ERROR([could not find curses library, required for the kconfig frontends])])
+AC_SEARCH_LIBS(
+    [tgetent],
+    [termcap tinfo ncursesw ncurses curses])
 
 #--------------------------------------------------------------------
 # Lastly, take care of crosstool-NG internal values
@@ -388,8 +399,8 @@ AS_IF(
      subdocdir=""
      datarootdir="$prefix"
      mandir="$docdir"],
-    [sublibdir="/ct-ng.\${VERSION}"
-     subdocdir="/ct-ng.\${VERSION}"])
+    [sublibdir="/\${VERSION}"
+     subdocdir="/\${VERSION}"])
 
 #--------------------------------------------------------------------
 # Finally, generate the output file(s)

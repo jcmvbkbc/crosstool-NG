@@ -10,29 +10,34 @@ PHONY += $(configurators)
 
 $(configurators): config_files
 
+export CT_IS_A_BACKEND:=$(CT_IS_A_BACKEND)
+export CT_BACKEND_ARCH:=$(CT_BACKEND_ARCH)
+export CT_BACKEND_KERNEL:=$(CT_BACKEND_KERNEL)
+export CT_BACKEND_LIBC:=$(CT_BACKEND_LIBC)
+
 # We need CONF for savedefconfig in scripts/saveSample.sh
 export CONF  := $(CT_LIB_DIR)/kconfig/conf
 MCONF := $(CT_LIB_DIR)/kconfig/mconf
 NCONF := $(CT_LIB_DIR)/kconfig/nconf
 
 menuconfig:
-	@$(ECHO) "  CONF  $(KCONFIG_TOP)"
+	@$(CT_ECHO) "  CONF  $(KCONFIG_TOP)"
 	$(SILENT)$(MCONF) $(KCONFIG_TOP)
 
 nconfig:
-	@$(ECHO) "  CONF  $(KCONFIG_TOP)"
+	@$(CT_ECHO) "  CONF  $(KCONFIG_TOP)"
 	$(SILENT)$(NCONF) $(KCONFIG_TOP)
 
 oldconfig: .config
-	@$(ECHO) "  CONF  $(KCONFIG_TOP)"
+	@$(CT_ECHO) "  CONF  $(KCONFIG_TOP)"
 	$(SILENT)$(CONF) --silent$@ $(KCONFIG_TOP)
 
 savedefconfig: .config
-	@$(ECHO) '  GEN   $@'
+	@$(CT_ECHO) '  GEN   $@'
 	$(SILENT)$(CONF) --savedefconfig=$${DEFCONFIG-defconfig} $(KCONFIG_TOP)
 
 defconfig:
-	@$(ECHO) '  CONF  $@'
+	@$(CT_ECHO) '  CONF  $@'
 	$(SILENT)$(CONF) --defconfig=$${DEFCONFIG-defconfig} $(KCONFIG_TOP)
 
 # Always be silent, the stdout an be >.config
@@ -55,6 +60,7 @@ extractconfig:
 
 help-config::
 	@echo  '  menuconfig         - Update current config using a menu based program'
+	@echo  '  nconfig            - Update current config using a menu based program'
 	@echo  '  oldconfig          - Update current config using a provided .config as base'
 	@echo  '  extractconfig      - Extract to stdout the configuration items from a'
 	@echo  '                       build.log file piped to stdin'
