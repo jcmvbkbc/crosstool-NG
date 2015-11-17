@@ -39,7 +39,7 @@ index 0000000..7d9e9db
 +++ b/libgcc/config/xtensa/t-windowed
 @@ -0,0 +1,2 @@
 +LIB2ADDEH = $(srcdir)/config/xtensa/unwind-dw2-xtensa.c \
-+   $(srcdir)/unwind-dw2-fde.c $(srcdir)/unwind-sjlj.c $(srcdir)/unwind-c.c
++   $(srcdir)/unwind-dw2-fde-dip.c $(srcdir)/unwind-sjlj.c $(srcdir)/unwind-c.c
 diff --git a/libgcc/config/xtensa/t-xtensa b/libgcc/config/xtensa/t-xtensa
 index 27399e6..ed3eb84 100644
 --- a/libgcc/config/xtensa/t-xtensa
@@ -50,7 +50,7 @@ index 27399e6..ed3eb84 100644
  LIB2ADD = $(srcdir)/config/xtensa/lib2funcs.S
 -
 -LIB2ADDEH = $(srcdir)/config/xtensa/unwind-dw2-xtensa.c \
--   $(srcdir)/unwind-dw2-fde.c $(srcdir)/unwind-sjlj.c $(srcdir)/unwind-c.c
+-   $(srcdir)/unwind-dw2-fde-dip.c $(srcdir)/unwind-sjlj.c $(srcdir)/unwind-c.c
 diff --git a/libgcc/configure b/libgcc/configure
 index 1425df6..03ea7ed 100644
 --- a/libgcc/configure

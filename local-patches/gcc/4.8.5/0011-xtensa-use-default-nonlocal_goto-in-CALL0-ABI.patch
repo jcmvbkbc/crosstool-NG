@@ -30,7 +30,7 @@ diff --git a/libgcc/config/xtensa/lib2funcs.S b/libgcc/config/xtensa/lib2funcs.S
 index f6f7a58..aea4449 100644
 --- a/libgcc/config/xtensa/lib2funcs.S
 +++ b/libgcc/config/xtensa/lib2funcs.S
-@@ -29,19 +29,17 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+@@ -29,11 +29,11 @@ see the files COPYING3 and COPYING.RUNTI
     current register window.  This is used to set up the stack so that
     arbitrary frames can be accessed.  */
  
@@ -40,10 +40,13 @@ index f6f7a58..aea4449 100644
  	.type	__xtensa_libgcc_window_spill,@function
  __xtensa_libgcc_window_spill:
 -#if XCHAL_HAVE_WINDOWED && !__XTENSA_CALL0_ABI__
- 	entry	sp, 32
- 	movi	a2, 0
- 	syscall
+ 	entry	sp, 48
+ #if XCHAL_NUM_AREGS > 16
+ 	call12	1f
+@@ -57,10 +57,8 @@ __xtensa_libgcc_window_spill:
+ 	mov	a8, a8
  	retw
+ #endif
 -#else
 -	ret
 -#endif
