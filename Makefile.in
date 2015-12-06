@@ -310,7 +310,7 @@ install-lib: $(DESTDIR)$(libdir)    \
              install-lib-main       \
              install-lib-samples
 
-LIB_SUB_DIR := config contrib patches scripts
+LIB_SUB_DIR := config contrib local-patches overlays patches scripts
 $(patsubst %,install-lib-%-copy,$(LIB_SUB_DIR)): $(DESTDIR)$(libdir)
 	@echo "  INSTDIR '$(patsubst install-lib-%-copy,%,$(@))/'"
 	@tar cf - --exclude='*.sh.in' $(patsubst install-lib-%-copy,%,$(@)) \
