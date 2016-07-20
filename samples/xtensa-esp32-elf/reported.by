@@ -1,0 +1,3 @@
+reporter_name="Ivan Grokhotkov <ivan@espressif.com>"
+reporter_url=""
+reporter_comment="Based on xtensa-esp108-elf sample reported by Max Filippov <jcmvbkbc@gmail.com>"
