@@ -1,7 +1,7 @@
-From 41db05e3a4a44bc6efdf464fe60b4484cfee93bb Mon Sep 17 00:00:00 2001
+From 16ac738a172afaeddeda6e84415363120ba1d635 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 28 Dec 2014 07:07:49 +0300
-Subject: [PATCH 18/25] xtensa: adjust register class definitions at runtime
+Subject: [PATCH 18/29] xtensa: adjust register class definitions at runtime
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---
@@ -22,7 +22,7 @@ index 303c441..5cc97fe 100644
  
  #endif /* !__XTENSA_PROTOS_H__ */
 diff --git a/gcc/config/xtensa/xtensa.c b/gcc/config/xtensa/xtensa.c
-index ba936e7..5ca4dbf 100644
+index e2ab20e..a25a899 100644
 --- a/gcc/config/xtensa/xtensa.c
 +++ b/gcc/config/xtensa/xtensa.c
 @@ -103,21 +103,6 @@ const char xtensa_leaf_regs[FIRST_PSEUDO_REGISTER] =
@@ -68,7 +68,7 @@ index ba936e7..5ca4dbf 100644
  struct gcc_target targetm = TARGET_INITIALIZER;
  
  
-@@ -3360,7 +3348,19 @@ order_regs_for_local_alloc (void)
+@@ -3361,7 +3349,19 @@ order_regs_for_local_alloc (void)
  {
    if (!leaf_function_p ())
      {
@@ -89,7 +89,7 @@ index ba936e7..5ca4dbf 100644
  	      FIRST_PSEUDO_REGISTER * sizeof (int));
      }
    else
-@@ -3897,4 +3897,50 @@ xtensa_legitimate_constant_p (enum machine_mode mode ATTRIBUTE_UNUSED, rtx x)
+@@ -3898,4 +3898,50 @@ xtensa_legitimate_constant_p (enum machine_mode mode ATTRIBUTE_UNUSED, rtx x)
    return !xtensa_tls_referenced_p (x);
  }
  
@@ -277,5 +277,5 @@ index 1670f8c..7c6eacc 100644
  /* Use the Xtensa AR register file for base registers.
     No index registers.  */
 -- 
-1.8.1.4
+2.1.4
 

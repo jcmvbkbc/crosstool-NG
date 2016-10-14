@@ -1,7 +1,7 @@
-From 5734054799af51281560490e3c4df42579e90dfb Mon Sep 17 00:00:00 2001
+From 7a2a96cacc060b99f95ad6f675b00124e42406bc Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Wed, 7 Jan 2015 08:03:48 +0300
-Subject: [PATCH 24/25] xtensa: use default DWARF unwinder for call0 ABI
+Subject: [PATCH 24/29] xtensa: use default DWARF unwinder for call0 ABI
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---
@@ -39,9 +39,9 @@ index 0000000..7d9e9db
 +++ b/libgcc/config/xtensa/t-windowed
 @@ -0,0 +1,2 @@
 +LIB2ADDEH = $(srcdir)/config/xtensa/unwind-dw2-xtensa.c \
-+   $(srcdir)/unwind-dw2-fde-dip.c $(srcdir)/unwind-sjlj.c $(srcdir)/unwind-c.c
++   $(srcdir)/unwind-dw2-fde.c $(srcdir)/unwind-sjlj.c $(srcdir)/unwind-c.c
 diff --git a/libgcc/config/xtensa/t-xtensa b/libgcc/config/xtensa/t-xtensa
-index 27399e6..ed3eb84 100644
+index 66d0eb3..ed3eb84 100644
 --- a/libgcc/config/xtensa/t-xtensa
 +++ b/libgcc/config/xtensa/t-xtensa
 @@ -11,6 +11,3 @@ LIB1ASMFUNCS = _mulsi3 _divsi3 _modsi3 _udivsi3 _umodsi3 \
@@ -111,5 +111,5 @@ index 8b7aba5..8ce0482 100644
  # we can check for asm_hidden_op.
  AC_CACHE_CHECK([for __attribute__((visibility("hidden")))],
 -- 
-1.8.1.4
+2.1.4
 

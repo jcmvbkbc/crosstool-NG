@@ -1,7 +1,7 @@
-From d7d88454a381342e9c2cf9013ff01d02fc9c7df5 Mon Sep 17 00:00:00 2001
+From b89248425a4d256f5016a5ae59fd464e26e3c0fa Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Tue, 6 Jan 2015 04:21:16 +0300
-Subject: [PATCH 20/25] xtensa: fix __builtin_return_address for call0 ABI
+Subject: [PATCH 20/29] xtensa: fix __builtin_return_address for call0 ABI
 
 Return 0 for frames other then the current, use get_hard_reg_initial_val
 as a0 may be clobbered at the point of query.
@@ -12,10 +12,10 @@ Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
  1 file changed, 31 insertions(+), 29 deletions(-)
 
 diff --git a/gcc/config/xtensa/xtensa.c b/gcc/config/xtensa/xtensa.c
-index 5ca4dbf..16c2697 100644
+index a25a899..e4a50ab 100644
 --- a/gcc/config/xtensa/xtensa.c
 +++ b/gcc/config/xtensa/xtensa.c
-@@ -2831,7 +2831,15 @@ xtensa_expand_epilogue (void)
+@@ -2832,7 +2832,15 @@ xtensa_expand_epilogue (void)
  rtx
  xtensa_return_addr (int count, rtx frame)
  {
@@ -32,7 +32,7 @@ index 5ca4dbf..16c2697 100644
  
    if (count == -1)
      retaddr = gen_rtx_REG (Pmode, A0_REG);
-@@ -2843,34 +2851,28 @@ xtensa_return_addr (int count, rtx frame)
+@@ -2844,34 +2852,28 @@ xtensa_return_addr (int count, rtx frame)
        emit_move_insn (retaddr, gen_rtx_MEM (Pmode, addr));
      }
  
@@ -90,5 +90,5 @@ index 5ca4dbf..16c2697 100644
  
  /* Disable the use of word-sized or smaller complex modes for structures,
 -- 
-1.8.1.4
+2.1.4
 

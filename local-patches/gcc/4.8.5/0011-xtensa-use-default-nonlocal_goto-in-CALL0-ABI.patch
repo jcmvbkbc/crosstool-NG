@@ -1,7 +1,7 @@
-From ffda4ff4764984633e3e88374fa38d97a6bb33a4 Mon Sep 17 00:00:00 2001
+From 1092d40ba1238506cb10b2d843f08bbd67ed370a Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 9 Nov 2014 23:17:49 +0300
-Subject: [PATCH 11/25] xtensa: use default nonlocal_goto in CALL0 ABI
+Subject: [PATCH 11/29] xtensa: use default nonlocal_goto in CALL0 ABI
 
 CALL0 doesn't need any additional stack modifications, so it can use the
 default nonlocal_goto pattern and it doesn't need helper functions to
@@ -27,10 +27,10 @@ index 7ddd326..7433b04 100644
    xtensa_expand_nonlocal_goto (operands);
    DONE;
 diff --git a/libgcc/config/xtensa/lib2funcs.S b/libgcc/config/xtensa/lib2funcs.S
-index f6f7a58..aea4449 100644
+index 3b1f0e4..1fee8be 100644
 --- a/libgcc/config/xtensa/lib2funcs.S
 +++ b/libgcc/config/xtensa/lib2funcs.S
-@@ -29,11 +29,11 @@ see the files COPYING3 and COPYING.RUNTI
+@@ -29,11 +29,11 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
     current register window.  This is used to set up the stack so that
     arbitrary frames can be accessed.  */
  
@@ -55,7 +55,7 @@ index f6f7a58..aea4449 100644
  
  
  /* __xtensa_nonlocal_goto: This code does all the hard work of a
-@@ -55,11 +53,11 @@ __xtensa_libgcc_window_spill:
+@@ -74,11 +72,11 @@ __xtensa_libgcc_window_spill:
    This function never returns to its caller but instead goes directly
    to the address of the specified goto handler.  */
  
@@ -68,7 +68,7 @@ index f6f7a58..aea4449 100644
  	entry	sp, 32
  
  	/* Flush registers.  */
-@@ -132,10 +130,8 @@ __xtensa_nonlocal_goto:
+@@ -148,10 +146,8 @@ __xtensa_nonlocal_goto:
  	src	a0, a8, a3	/* combine them with a funnel shift */
  
  	retw
@@ -81,5 +81,5 @@ index f6f7a58..aea4449 100644
  
  /* __xtensa_sync_caches: This function is called after writing a trampoline
 -- 
-1.8.1.4
+2.1.4
 

@@ -1,0 +1,426 @@
+From e2aad7ac2010d007e23d3438923d7f3d20d66750 Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Thu, 13 Oct 2016 23:49:44 -0700
+Subject: [PATCH 29/29] xtensa: add HW FPU sequences for DIV/SQRT/RECIP/RSQRT
+
+Use new FPU instruction sequences documented in the ISA book to
+implement __divsf3, __divdf3, __recipsf2, __recipdf2, __rsqrtsf2,
+__rsqrtdf2 and __ieee754_sqrtf and __ieee754_sqrt.
+
+2013-02-12  Ding-Kai Chen  <dkchen@cadence.com>
+libgcc/
+	* config/xtensa/ieee754-df.S (__recipdf2, __rsqrtdf2,
+	__ieee754_sqrt): New functions.
+	(__divdf3): Add implementation with new FPU instructions under
+	#if XCHAL_HAVE_DFP_DIV.
+	* config/xtensa/ieee754-sf.S (__recipsf2, __rsqrtsf2,
+	__ieee754_sqrtf): New functions.
+	(__divsf3): Add implementation with new FPU instructions under
+	#if XCHAL_HAVE_FP_DIV.
+	* config/xtensa/t-xtensa (LIB1ASMFUNCS): Add _sqrtf, _recipsf2
+	_rsqrtsf2, _sqrt, _recipdf2 and _rsqrtdf2.
+
+Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
+---
+ libgcc/config/xtensa/ieee754-df.S | 177 ++++++++++++++++++++++++++++++++++++++
+ libgcc/config/xtensa/ieee754-sf.S | 155 +++++++++++++++++++++++++++++++++
+ libgcc/config/xtensa/t-xtensa     |   4 +-
+ 3 files changed, 335 insertions(+), 1 deletion(-)
+
+diff --git a/libgcc/config/xtensa/ieee754-df.S b/libgcc/config/xtensa/ieee754-df.S
+index 819b596..228349c 100644
+--- a/libgcc/config/xtensa/ieee754-df.S
++++ b/libgcc/config/xtensa/ieee754-df.S
+@@ -1217,6 +1217,57 @@ __muldf3:
+ #ifdef L_divdf3
+ 
+ 	/* Division */
++
++#if XCHAL_HAVE_DFP_DIV
++
++        .text
++        .align 4
++        .global __divdf3
++        .type	__divdf3, @function
++__divdf3:
++	leaf_entry	sp, 16
++
++	wfrd		f1, xh, xl
++	wfrd		f2, yh, yl
++
++	div0.d		f3, f2
++	nexp01.d	f4, f2
++	const.d		f0, 1
++	maddn.d		f0, f4, f3
++	const.d		f5, 0
++	mov.d		f7, f2
++	mkdadj.d	f7, f1
++	maddn.d		f3, f0, f3
++	maddn.d		f5, f0, f0
++	nexp01.d	f1, f1
++	div0.d		f2, f2
++	maddn.d		f3, f5, f3
++	const.d		f5, 1
++	const.d		f0, 0
++	neg.d		f6, f1
++	maddn.d		f5, f4, f3
++	maddn.d		f0, f6, f2
++	maddn.d		f3, f5, f3
++	maddn.d		f6, f4, f0
++	const.d		f2, 1
++	maddn.d		f2, f4, f3
++	maddn.d		f0, f6, f3
++	neg.d		f1, f1
++	maddn.d		f3, f2, f3
++	maddn.d		f1, f4, f0
++	addexpm.d	f0, f7
++	addexp.d	f3, f7
++	divn.d		f0, f1, f3
++
++	rfr		xl, f0
++	rfrd		xh, f0
++
++	leaf_return
++
++#else
++
++	.literal_position
++
+ __divdf3_aux:
+ 
+ 	/* Handle unusual cases (zeros, subnormals, NaNs and Infinities).
+@@ -1535,6 +1586,8 @@ __divdf3:
+ 	movi	xl, 0
+ 	leaf_return
+ 
++#endif /* XCHAL_HAVE_DFP_DIV */
++
+ #endif /* L_divdf3 */
+ 
+ #ifdef L_cmpdf2
+@@ -2386,3 +2439,127 @@ __extendsfdf2:
+ #endif /* L_extendsfdf2 */
+ 
+ 
++#if XCHAL_HAVE_DFP_SQRT
++#ifdef L_sqrt
++
++        .text
++        .align 4
++        .global __ieee754_sqrt
++        .type	__ieee754_sqrt, @function
++__ieee754_sqrt:
++	leaf_entry	sp, 16
++
++	wfrd		f1, xh, xl
++
++	sqrt0.d		f2, f1
++	const.d		f4, 0
++	maddn.d		f4, f2, f2
++	nexp01.d	f3, f1
++	const.d		f0, 3
++	addexp.d	f3, f0
++	maddn.d		f0, f4, f3
++	nexp01.d	f4, f1
++	maddn.d		f2, f0, f2
++	const.d		f5, 0
++	maddn.d		f5, f2, f3
++	const.d		f0, 3
++	maddn.d		f0, f5, f2
++	neg.d		f6, f4
++	maddn.d		f2, f0, f2
++	const.d		f0, 0
++	const.d		f5, 0
++	const.d		f7, 0
++	maddn.d		f0, f6, f2
++	maddn.d		f5, f2, f3
++	const.d		f3, 3
++	maddn.d		f7, f3, f2
++	maddn.d		f4, f0, f0
++	maddn.d		f3, f5, f2
++	neg.d		f2, f7
++	maddn.d		f0, f4, f2
++	maddn.d		f7, f3, f7
++	mksadj.d	f2, f1
++	nexp01.d	f1, f1
++	maddn.d		f1, f0, f0
++	neg.d		f3, f7
++	addexpm.d	f0, f2
++	addexp.d	f3, f2
++	divn.d		f0, f1, f3
++
++	rfr		xl, f0
++	rfrd		xh, f0
++
++	leaf_return
++
++#endif /* L_sqrt */
++#endif /* XCHAL_HAVE_DFP_SQRT */
++
++#if XCHAL_HAVE_DFP_RECIP
++#ifdef L_recipdf2
++	/* Reciprocal */
++
++	.align	4
++	.global	__recipdf2
++	.type	__recipdf2, @function
++__recipdf2:
++	leaf_entry	sp, 16
++
++	wfrd		f1, xh, xl
++
++	recip0.d	f0, f1
++	const.d		f2, 2
++	msub.d		f2, f1, f0
++	mul.d		f3, f1, f0
++	const.d		f4, 2
++	mul.d		f5, f0, f2
++	msub.d		f4, f3, f2
++	const.d		f2, 1
++	mul.d		f0, f5, f4
++	msub.d		f2, f1, f0
++	maddn.d		f0, f0, f2
++
++	rfr		xl, f0
++	rfrd		xh, f0
++
++	leaf_return
++
++#endif /* L_recipdf2 */
++#endif /* XCHAL_HAVE_DFP_RECIP */
++
++#if XCHAL_HAVE_DFP_RSQRT
++#ifdef L_rsqrtdf2
++	/* Reciprocal square root */
++
++	.align	4
++	.global	__rsqrtdf2
++	.type	__rsqrtdf2, @function
++__rsqrtdf2:
++	leaf_entry	sp, 16
++
++	wfrd		f1, xh, xl
++
++	rsqrt0.d	f0, f1
++	mul.d		f2, f1, f0
++	const.d		f3, 3
++	mul.d		f4, f3, f0
++	const.d		f5, 1
++	msub.d		f5, f2, f0
++	maddn.d		f0, f4, f5
++	const.d		f2, 1
++	mul.d		f4, f1, f0
++	mul.d		f5, f3, f0
++	msub.d		f2, f4, f0
++	maddn.d		f0, f5, f2
++	const.d		f2, 1
++	mul.d		f1, f1, f0
++	mul.d		f3, f3, f0
++	msub.d		f2, f1, f0
++	maddn.d		f0, f3, f2
++
++	rfr		xl, f0
++	rfrd		xh, f0
++
++	leaf_return
++
++#endif /* L_rsqrtdf2 */
++#endif /* XCHAL_HAVE_DFP_RSQRT */
+diff --git a/libgcc/config/xtensa/ieee754-sf.S b/libgcc/config/xtensa/ieee754-sf.S
+index e9c10b4..af90940 100644
+--- a/libgcc/config/xtensa/ieee754-sf.S
++++ b/libgcc/config/xtensa/ieee754-sf.S
+@@ -885,6 +885,51 @@ __mulsf3:
+ #ifdef L_divsf3
+ 
+ 	/* Division */
++
++#if XCHAL_HAVE_FP_DIV
++
++	.align	4
++	.global	__divsf3
++	.type	__divsf3, @function
++__divsf3:
++	leaf_entry	sp, 16
++
++	wfr		f1, a2	/* dividend */
++	wfr		f2, a3	/* divisor */
++
++	div0.s		f3, f2
++	nexp01.s	f4, f2
++	const.s		f5, 1
++	maddn.s		f5, f4, f3
++	mov.s		f6, f3
++	mov.s		f7, f2
++	nexp01.s	f2, f1
++	maddn.s		f6, f5, f6
++	const.s		f5, 1
++	const.s		f0, 0
++	neg.s		f8, f2
++	maddn.s		f5, f4, f6
++	maddn.s		f0, f8, f3
++	mkdadj.s	f7, f1
++	maddn.s		f6, f5, f6
++	maddn.s		f8, f4, f0
++	const.s		f3, 1
++	maddn.s		f3, f4, f6
++	maddn.s		f0, f8, f6
++	neg.s		f2, f2
++	maddn.s		f6, f3, f6
++	maddn.s		f2, f4, f0
++	addexpm.s	f0, f7
++	addexp.s	f6, f7
++	divn.s		f0, f2, f6
++
++	rfr		a2, f0
++
++	leaf_return
++
++#else
++
++	.literal_position
+ __divsf3_aux:
+ 
+ 	/* Handle unusual cases (zeros, subnormals, NaNs and Infinities).
+@@ -1110,6 +1155,8 @@ __divsf3:
+ 	slli	a2, a2, 31
+ 	leaf_return
+ 
++#endif /* XCHAL_HAVE_FP_DIV */
++
+ #endif /* L_divsf3 */
+ 
+ #ifdef L_cmpsf2
+@@ -1755,3 +1802,111 @@ __floatdisf:
+ 	leaf_return
+ 
+ #endif /* L_floatdisf */
++
++#if XCHAL_HAVE_FP_SQRT
++#ifdef L_sqrtf
++	/* Square root */
++
++	.align	4
++	.global	__ieee754_sqrtf
++	.type	__ieee754_sqrtf, @function
++__ieee754_sqrtf:
++	leaf_entry	sp, 16
++
++	wfr		f1, a2
++
++	sqrt0.s		f2, f1
++	const.s		f3, 0
++	maddn.s		f3, f2, f2
++	nexp01.s	f4, f1
++	const.s		f0, 3
++	addexp.s	f4, f0
++	maddn.s		f0, f3, f4
++	nexp01.s	f3, f1
++	neg.s		f5, f3
++	maddn.s		f2, f0, f2
++	const.s		f0, 0
++	const.s		f6, 0
++	const.s		f7, 0
++	maddn.s		f0, f5, f2
++	maddn.s		f6, f2, f4
++	const.s		f4, 3
++	maddn.s		f7, f4, f2
++	maddn.s		f3, f0, f0
++	maddn.s		f4, f6, f2
++	neg.s		f2, f7
++	maddn.s		f0, f3, f2
++	maddn.s		f7, f4, f7
++	mksadj.s	f2, f1
++	nexp01.s	f1, f1
++	maddn.s		f1, f0, f0
++	neg.s		f3, f7
++	addexpm.s	f0, f2
++	addexp.s	f3, f2
++	divn.s		f0, f1, f3
++
++	rfr		a2, f0
++
++	leaf_return
++
++#endif /* L_sqrtf */
++#endif /* XCHAL_HAVE_FP_SQRT */
++
++#if XCHAL_HAVE_FP_RECIP
++#ifdef L_recipsf2
++	/* Reciprocal */
++
++	.align	4
++	.global	__recipsf2
++	.type	__recipsf2, @function
++__recipsf2:
++	leaf_entry	sp, 16
++
++	wfr		f1, a2
++
++	recip0.s	f0, f1
++	const.s		f2, 1
++	msub.s		f2, f1, f0
++	maddn.s		f0, f0, f2
++	const.s		f2, 1
++	msub.s		f2, f1, f0
++	maddn.s		f0, f0, f2
++
++	rfr		a2, f0
++
++	leaf_return
++
++#endif /* L_recipsf2 */
++#endif /* XCHAL_HAVE_FP_RECIP */
++
++#if XCHAL_HAVE_FP_RSQRT
++#ifdef L_rsqrtsf2
++	/* Reciprocal square root */
++
++	.align	4
++	.global	__rsqrtsf2
++	.type	__rsqrtsf2, @function
++__rsqrtsf2:
++	leaf_entry	sp, 16
++
++	wfr		f1, a2
++
++	rsqrt0.s	f0, f1
++	mul.s		f2, f1, f0
++	const.s		f3, 3;
++	mul.s		f4, f3, f0
++	const.s		f5, 1
++	msub.s		f5, f2, f0
++	maddn.s		f0, f4, f5
++	mul.s		f2, f1, f0
++	mul.s		f1, f3, f0
++	const.s		f3, 1
++	msub.s		f3, f2, f0
++	maddn.s		f0, f1, f3
++
++	rfr		a2, f0
++
++	leaf_return
++
++#endif /* L_rsqrtsf2 */
++#endif /* XCHAL_HAVE_FP_RSQRT */
+diff --git a/libgcc/config/xtensa/t-xtensa b/libgcc/config/xtensa/t-xtensa
+index ed3eb84..90df5f1 100644
+--- a/libgcc/config/xtensa/t-xtensa
++++ b/libgcc/config/xtensa/t-xtensa
+@@ -4,10 +4,12 @@ LIB1ASMFUNCS = _mulsi3 _divsi3 _modsi3 _udivsi3 _umodsi3 \
+ 	_ashldi3 _ashrdi3 _lshrdi3 \
+ 	_negsf2 _addsubsf3 _mulsf3 _divsf3 _cmpsf2 _fixsfsi _fixsfdi \
+ 	_fixunssfsi _fixunssfdi _floatsisf _floatunsisf \
++	_sqrtf _recipsf2 _rsqrtsf2 \
+ 	_floatdisf _floatundisf \
+ 	_negdf2 _addsubdf3 _muldf3 _divdf3 _cmpdf2 _fixdfsi _fixdfdi \
+ 	_fixunsdfsi _fixunsdfdi _floatsidf _floatunsidf \
+ 	_floatdidf _floatundidf \
+-	_truncdfsf2 _extendsfdf2
++	_truncdfsf2 _extendsfdf2 \
++	_sqrt _recipdf2 _rsqrtdf2
+ 
+ LIB2ADD = $(srcdir)/config/xtensa/lib2funcs.S
+-- 
+2.1.4
+

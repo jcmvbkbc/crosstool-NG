@@ -1,7 +1,7 @@
-From b1b4c61a540a146d5f1acb31fa065204b83eb6a4 Mon Sep 17 00:00:00 2001
+From c04c2fa05b1081692d8d3206a063747fc9242462 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 9 Nov 2014 04:52:36 +0300
-Subject: [PATCH 07/25] xtensa: use correct guards on CRT_CALL_STATIC_FUNCTION
+Subject: [PATCH 07/29] xtensa: use correct guards on CRT_CALL_STATIC_FUNCTION
  definition
 
 CRT_CALL_STATIC_FUNCTION is used in libgcc, so it needs to be defined
@@ -33,5 +33,5 @@ index 9f4a8a1..f7e22ce 100644
      asm (SECTION_OP "\n\
  	movi\ta0, " USER_LABEL_PREFIX #FUNC "\n\
 -- 
-1.8.1.4
+2.1.4
 

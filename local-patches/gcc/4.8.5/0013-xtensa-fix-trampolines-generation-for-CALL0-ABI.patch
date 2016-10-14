@@ -1,7 +1,7 @@
-From 7234dd9d4ee7af955e1edc20709c06e9d8112581 Mon Sep 17 00:00:00 2001
+From 62b2b683bd66671bbcaa979a1c9a935a809ed16c Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Mon, 10 Nov 2014 04:55:15 +0300
-Subject: [PATCH 13/25] xtensa: fix trampolines generation for CALL0 ABI
+Subject: [PATCH 13/29] xtensa: fix trampolines generation for CALL0 ABI
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---
@@ -10,10 +10,10 @@ Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
  2 files changed, 117 insertions(+), 53 deletions(-)
 
 diff --git a/gcc/config/xtensa/xtensa.c b/gcc/config/xtensa/xtensa.c
-index f44d9ef..1b82c75 100644
+index 8185bbc..4372e6b 100644
 --- a/gcc/config/xtensa/xtensa.c
 +++ b/gcc/config/xtensa/xtensa.c
-@@ -3730,9 +3730,14 @@ xtensa_function_value_regno_p (const unsigned int regno)
+@@ -3731,9 +3731,14 @@ xtensa_function_value_regno_p (const unsigned int regno)
  static rtx
  xtensa_static_chain (const_tree ARG_UNUSED (fndecl), bool incoming_p)
  {
@@ -31,7 +31,7 @@ index f44d9ef..1b82c75 100644
  }
  
  
-@@ -3750,65 +3755,109 @@ xtensa_asm_trampoline_template (FILE *stream)
+@@ -3751,65 +3756,109 @@ xtensa_asm_trampoline_template (FILE *stream)
    bool use_call0 = (TARGET_CONST16 || TARGET_ABSOLUTE_LITERALS);
  
    fprintf (stream, "\t.begin no-transform\n");
@@ -188,7 +188,7 @@ index f44d9ef..1b82c75 100644
    fprintf (stream, "\t.end no-transform\n");
  }
  
-@@ -3817,8 +3866,19 @@ xtensa_trampoline_init (rtx m_tramp, tree fndecl, rtx chain)
+@@ -3818,8 +3867,19 @@ xtensa_trampoline_init (rtx m_tramp, tree fndecl, rtx chain)
  {
    rtx func = XEXP (DECL_RTL (fndecl), 0);
    bool use_call0 = (TARGET_CONST16 || TARGET_ABSOLUTE_LITERALS);
@@ -228,5 +228,5 @@ index 23374bc..1670f8c 100644
  /* Alignment required for trampolines, in bits.  */
  #define TRAMPOLINE_ALIGNMENT 32
 -- 
-1.8.1.4
+2.1.4
 

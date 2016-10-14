@@ -1,7 +1,7 @@
-From a1fa1f57102825b18926469d5bfa538b0c25bc11 Mon Sep 17 00:00:00 2001
+From a6fc68e9fc10e70e3cd80486f783ab22be4c7438 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sat, 10 Jan 2015 15:51:22 +0300
-Subject: [PATCH 22/25] xtensa: add notes to registers saved in prologue
+Subject: [PATCH 22/29] xtensa: add notes to registers saved in prologue
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---
@@ -9,10 +9,10 @@ Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
  1 file changed, 38 insertions(+), 4 deletions(-)
 
 diff --git a/gcc/config/xtensa/xtensa.c b/gcc/config/xtensa/xtensa.c
-index 52b24c3..a2d1eaf 100644
+index 380338f..f806329 100644
 --- a/gcc/config/xtensa/xtensa.c
 +++ b/gcc/config/xtensa/xtensa.c
-@@ -2667,6 +2667,11 @@ xtensa_expand_prologue (void)
+@@ -2668,6 +2668,11 @@ xtensa_expand_prologue (void)
  	{
  	  insn = emit_insn (gen_addsi3 (stack_pointer_rtx, stack_pointer_rtx,
  					GEN_INT (-total_size)));
@@ -24,7 +24,7 @@ index 52b24c3..a2d1eaf 100644
  	  offset = total_size - UNITS_PER_WORD;
  	}
        else if (xtensa_callee_save_size)
-@@ -2678,6 +2683,11 @@ xtensa_expand_prologue (void)
+@@ -2679,6 +2684,11 @@ xtensa_expand_prologue (void)
  	    {
  	      insn = emit_insn (gen_addsi3 (stack_pointer_rtx, stack_pointer_rtx,
  					    GEN_INT (-xtensa_callee_save_size)));
@@ -36,7 +36,7 @@ index 52b24c3..a2d1eaf 100644
  	      offset = xtensa_callee_save_size - UNITS_PER_WORD;
  	    }
  	  else
-@@ -2685,6 +2695,11 @@ xtensa_expand_prologue (void)
+@@ -2686,6 +2696,11 @@ xtensa_expand_prologue (void)
  	      rtx tmp_reg = gen_rtx_REG (Pmode, A9_REG);
  	      emit_move_insn (tmp_reg, GEN_INT (total_size));
  	      insn = emit_insn (gen_subsi3 (stack_pointer_rtx, stack_pointer_rtx, tmp_reg));
@@ -48,7 +48,7 @@ index 52b24c3..a2d1eaf 100644
  	      offset = total_size - UNITS_PER_WORD;
  	    }
  	}
-@@ -2694,9 +2709,14 @@ xtensa_expand_prologue (void)
+@@ -2695,9 +2710,14 @@ xtensa_expand_prologue (void)
  	  if (xtensa_call_save_reg(regno))
  	    {
  	      rtx x = gen_rtx_PLUS (Pmode, stack_pointer_rtx, GEN_INT (offset));
@@ -64,7 +64,7 @@ index 52b24c3..a2d1eaf 100644
  	    }
  	}
        if (total_size > 1024)
-@@ -2704,6 +2724,11 @@ xtensa_expand_prologue (void)
+@@ -2705,6 +2725,11 @@ xtensa_expand_prologue (void)
  	  rtx tmp_reg = gen_rtx_REG (Pmode, A9_REG);
  	  emit_move_insn (tmp_reg, GEN_INT (total_size - xtensa_callee_save_size));
  	  insn = emit_insn (gen_subsi3 (stack_pointer_rtx, stack_pointer_rtx, tmp_reg));
@@ -76,7 +76,7 @@ index 52b24c3..a2d1eaf 100644
  	}
      }
  
-@@ -2733,11 +2758,20 @@ xtensa_expand_prologue (void)
+@@ -2734,11 +2759,20 @@ xtensa_expand_prologue (void)
  	    }
  	}
        else
@@ -101,5 +101,5 @@ index 52b24c3..a2d1eaf 100644
        /* Create a note to describe the CFA.  Because this is only used to set
  	 DW_AT_frame_base for debug info, don't bother tracking changes through
 -- 
-1.8.1.4
+2.1.4
 

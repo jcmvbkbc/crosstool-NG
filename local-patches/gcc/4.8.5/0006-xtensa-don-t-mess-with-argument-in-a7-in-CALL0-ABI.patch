@@ -1,7 +1,7 @@
-From 2d1af52aaa84f8e15a32eeb5ec58868f842a8acc Mon Sep 17 00:00:00 2001
+From 7894497efbd07286247f55fd574fa8addfa68ad8 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 9 Nov 2014 03:48:56 +0300
-Subject: [PATCH 06/25] xtensa: don't mess with argument in a7 in CALL0 ABI
+Subject: [PATCH 06/29] xtensa: don't mess with argument in a7 in CALL0 ABI
 
 Otherwise prologue ends with frame pointer in a7 instead of a15. CALL0
 ABI doesn't need this special care because a7 is an ordinary register in
@@ -13,10 +13,10 @@ Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/gcc/config/xtensa/xtensa.c b/gcc/config/xtensa/xtensa.c
-index 7a17ea8..29dc603 100644
+index 2527c96..bb03030 100644
 --- a/gcc/config/xtensa/xtensa.c
 +++ b/gcc/config/xtensa/xtensa.c
-@@ -2118,7 +2118,7 @@ xtensa_function_arg_1 (cumulative_args_t cum_v, enum machine_mode mode,
+@@ -2119,7 +2119,7 @@ xtensa_function_arg_1 (cumulative_args_t cum_v, enum machine_mode mode,
    regno = regbase + *arg_words;
  
    if (cum->incoming && regno <= A7_REG && regno + words > A7_REG)
@@ -25,7 +25,7 @@ index 7a17ea8..29dc603 100644
  
    return gen_rtx_REG (mode, regno);
  }
-@@ -2957,14 +2957,14 @@ xtensa_builtin_saveregs (void)
+@@ -2958,14 +2958,14 @@ xtensa_builtin_saveregs (void)
    set_mem_alias_set (gp_regs, get_varargs_alias_set ());
  
    /* Now store the incoming registers.  */
@@ -44,5 +44,5 @@ index 7a17ea8..29dc603 100644
    return XEXP (gp_regs, 0);
  }
 -- 
-1.8.1.4
+2.1.4
 

@@ -1,0 +1,93 @@
+From 77e6642f62ac0bb93acc3360d104537cd5c486ce Mon Sep 17 00:00:00 2001
+From: jcmvbkbc <jcmvbkbc@138bc75d-0d04-0410-961f-82ee72b054a4>
+Date: Wed, 15 Oct 2014 04:17:30 +0000
+Subject: [PATCH 27/29] xtensa: drop unimplemented floating point operations
+
+xtensa ISA never implemented FP division, reciprocal, square root and
+inverse square root as single opcode. Remove patterns that can emit
+them.
+
+2014-10-09  Max Filippov  <jcmvbkbc@gmail.com>
+
+gcc/
+    * config/xtensa/xtensa.md (divsf3, *recipsf2, sqrtsf2, *rsqrtsf2):
+    remove.
+
+git-svn-id: svn+ssh://gcc.gnu.org/svn/gcc/trunk@216233 138bc75d-0d04-0410-961f-82ee72b054a4
+Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
+---
+ gcc/config/xtensa/xtensa.md | 44 +-------------------------------------------
+ 1 file changed, 1 insertion(+), 43 deletions(-)
+
+diff --git a/gcc/config/xtensa/xtensa.md b/gcc/config/xtensa/xtensa.md
+index 5303a59..3eb8b73 100644
+--- a/gcc/config/xtensa/xtensa.md
++++ b/gcc/config/xtensa/xtensa.md
+@@ -84,7 +84,7 @@
+ ;; Attributes.
+ 
+ (define_attr "type"
+-  "unknown,jump,call,load,store,move,arith,multi,nop,farith,fmadd,fdiv,fsqrt,fconv,fload,fstore,mul16,mul32,div32,mac16,rsr,wsr,entry"
++  "unknown,jump,call,load,store,move,arith,multi,nop,farith,fmadd,fconv,fload,fstore,mul16,mul32,div32,mac16,rsr,wsr,entry"
+   (const_string "unknown"))
+ 
+ (define_attr "mode"
+@@ -362,26 +362,6 @@
+    (set_attr "mode"	"SI")
+    (set_attr "length"	"3")])
+ 
+-(define_insn "divsf3"
+-  [(set (match_operand:SF 0 "register_operand" "=f")
+-	(div:SF (match_operand:SF 1 "register_operand" "f")
+-		(match_operand:SF 2 "register_operand" "f")))]
+-  "TARGET_HARD_FLOAT_DIV"
+-  "div.s\t%0, %1, %2"
+-  [(set_attr "type"	"fdiv")
+-   (set_attr "mode"	"SF")
+-   (set_attr "length"	"3")])
+-
+-(define_insn "*recipsf2"
+-  [(set (match_operand:SF 0 "register_operand" "=f")
+-	(div:SF (match_operand:SF 1 "const_float_1_operand" "")
+-		(match_operand:SF 2 "register_operand" "f")))]
+-  "TARGET_HARD_FLOAT_RECIP && flag_unsafe_math_optimizations"
+-  "recip.s\t%0, %2"
+-  [(set_attr "type"	"fdiv")
+-   (set_attr "mode"	"SF")
+-   (set_attr "length"	"3")])
+-
+ 
+ ;; Remainders.
+ 
+@@ -406,28 +386,6 @@
+    (set_attr "length"	"3")])
+ 
+ 
+-;; Square roots.
+-
+-(define_insn "sqrtsf2"
+-  [(set (match_operand:SF 0 "register_operand" "=f")
+-	(sqrt:SF (match_operand:SF 1 "register_operand" "f")))]
+-  "TARGET_HARD_FLOAT_SQRT"
+-  "sqrt.s\t%0, %1"
+-  [(set_attr "type"	"fsqrt")
+-   (set_attr "mode"	"SF")
+-   (set_attr "length"	"3")])
+-
+-(define_insn "*rsqrtsf2"
+-  [(set (match_operand:SF 0 "register_operand" "=f")
+-	(div:SF (match_operand:SF 1 "const_float_1_operand" "")
+-		(sqrt:SF (match_operand:SF 2 "register_operand" "f"))))]
+-  "TARGET_HARD_FLOAT_RSQRT && flag_unsafe_math_optimizations"
+-  "rsqrt.s\t%0, %2"
+-  [(set_attr "type"	"fsqrt")
+-   (set_attr "mode"	"SF")
+-   (set_attr "length"	"3")])
+-
+-
+ ;; Absolute value.
+ 
+ (define_insn "abssi2"
+-- 
+2.1.4
+

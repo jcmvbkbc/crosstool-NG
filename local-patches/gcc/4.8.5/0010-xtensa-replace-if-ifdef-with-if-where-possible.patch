@@ -1,7 +1,7 @@
-From 8fc87fc4ac361effe8903b433a622c339c076a4f Mon Sep 17 00:00:00 2001
+From bb6c518630b5a8ecbe5fce8cbcb729387a461aae Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 9 Nov 2014 06:31:09 +0300
-Subject: [PATCH 10/25] xtensa: replace #if/#ifdef with if where possible
+Subject: [PATCH 10/29] xtensa: replace #if/#ifdef with if where possible
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---
@@ -10,10 +10,10 @@ Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
  2 files changed, 143 insertions(+), 149 deletions(-)
 
 diff --git a/gcc/config/xtensa/xtensa.c b/gcc/config/xtensa/xtensa.c
-index e5dc8db..f44d9ef 100644
+index 19f9ee5..8185bbc 100644
 --- a/gcc/config/xtensa/xtensa.c
 +++ b/gcc/config/xtensa/xtensa.c
-@@ -1603,11 +1603,10 @@ xtensa_setup_frame_addresses (void)
+@@ -1604,11 +1604,10 @@ xtensa_setup_frame_addresses (void)
    /* Set flag to cause TARGET_FRAME_POINTER_REQUIRED to return true.  */
    cfun->machine->accesses_prev_frame = 1;
  
@@ -29,7 +29,7 @@ index e5dc8db..f44d9ef 100644
  }
  
  
-@@ -2659,64 +2658,66 @@ xtensa_expand_prologue (void)
+@@ -2660,64 +2659,66 @@ xtensa_expand_prologue (void)
  
    total_size = compute_frame_size (get_frame_size ());
  
@@ -144,7 +144,7 @@ index e5dc8db..f44d9ef 100644
  
    if (frame_pointer_needed)
      {
-@@ -2766,73 +2767,74 @@ xtensa_expand_prologue (void)
+@@ -2767,73 +2768,74 @@ xtensa_expand_prologue (void)
  void
  xtensa_expand_epilogue (void)
  {
@@ -276,7 +276,7 @@ index e5dc8db..f44d9ef 100644
    xtensa_current_frame_size = 0;
    xtensa_callee_save_size = 0;
    emit_jump_insn (gen_return ());
-@@ -2853,35 +2855,34 @@ xtensa_return_addr (int count, rtx frame)
+@@ -2854,35 +2856,34 @@ xtensa_return_addr (int count, rtx frame)
        emit_move_insn (retaddr, gen_rtx_MEM (Pmode, addr));
      }
  
@@ -372,5 +372,5 @@ index 653631e..23374bc 100644
  /* Symbolic macros for the registers used to return integer, floating
     point, and values of coprocessor and user-defined modes.  */
 -- 
-1.8.1.4
+2.1.4
 

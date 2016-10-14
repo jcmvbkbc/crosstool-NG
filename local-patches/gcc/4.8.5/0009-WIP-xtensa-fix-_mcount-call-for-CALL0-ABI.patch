@@ -1,7 +1,7 @@
-From c73b720ae2759c70a4c657962e0bcb40c42fd9bc Mon Sep 17 00:00:00 2001
+From d5f19b723b8a89e4d8501a3c26fc90e5a5f6727c Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 9 Nov 2014 06:26:29 +0300
-Subject: [PATCH 09/25] WIP: xtensa: fix _mcount call for CALL0 ABI
+Subject: [PATCH 09/29] WIP: xtensa: fix _mcount call for CALL0 ABI
 
 _mcount is not specified, let's call it with return address in a10, and
 require it to preserve all registers.
@@ -52,5 +52,5 @@ index f7e22ce..653631e 100644
  /* Stack pointer value doesn't matter at exit.  */
  #define EXIT_IGNORE_STACK 1
 -- 
-1.8.1.4
+2.1.4
 

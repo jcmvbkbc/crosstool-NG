@@ -1,7 +1,7 @@
-From d82c531991bb31e864e05f02032187f2e9dbc66f Mon Sep 17 00:00:00 2001
+From 43c25145fe7e3ad0e4088f29bc9fc29b6076ecc2 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Sun, 28 Sep 2014 22:52:01 +0400
-Subject: [PATCH 03/25] WIP: xtensa: implement callee-saved register saving
+Subject: [PATCH 03/29] WIP: xtensa: implement callee-saved register saving
 
 Also fix frame pointer, correctly move stack pointer, and avoid movsp.
 
@@ -26,7 +26,7 @@ index 4be2ebe..303c441 100644
  
  #endif /* !__XTENSA_PROTOS_H__ */
 diff --git a/gcc/config/xtensa/xtensa.c b/gcc/config/xtensa/xtensa.c
-index 3cb1e27..7d139fc 100644
+index 645644e..8778407 100644
 --- a/gcc/config/xtensa/xtensa.c
 +++ b/gcc/config/xtensa/xtensa.c
 @@ -75,6 +75,8 @@ char xtensa_hard_regno_mode_ok[(int) MAX_MACHINE_MODE][FIRST_PSEUDO_REGISTER];
@@ -87,7 +87,7 @@ index 3cb1e27..7d139fc 100644
  
        if (!ACC_REG_P (dst_regnum))
  	return true;
-@@ -1609,9 +1603,11 @@ xtensa_setup_frame_addresses (void)
+@@ -1610,9 +1604,11 @@ xtensa_setup_frame_addresses (void)
    /* Set flag to cause TARGET_FRAME_POINTER_REQUIRED to return true.  */
    cfun->machine->accesses_prev_frame = 1;
  
@@ -99,7 +99,7 @@ index 3cb1e27..7d139fc 100644
  }
  
  
-@@ -2599,14 +2595,26 @@ xtensa_output_literal (FILE *file, rtx x, enum machine_mode mode, int labelno)
+@@ -2600,14 +2596,26 @@ xtensa_output_literal (FILE *file, rtx x, enum machine_mode mode, int labelno)
  long
  compute_frame_size (int size)
  {
@@ -126,7 +126,7 @@ index 3cb1e27..7d139fc 100644
    return xtensa_current_frame_size;
  }
  
-@@ -2633,15 +2641,17 @@ xtensa_frame_pointer_required (void)
+@@ -2634,15 +2642,17 @@ xtensa_frame_pointer_required (void)
  void
  xtensa_expand_prologue (void)
  {
@@ -148,7 +148,7 @@ index 3cb1e27..7d139fc 100644
    else
      {
        /* Use a8 as a temporary since a0-a7 may be live.  */
-@@ -2651,6 +2661,52 @@ xtensa_expand_prologue (void)
+@@ -2652,6 +2662,52 @@ xtensa_expand_prologue (void)
        emit_insn (gen_subsi3 (tmp_reg, stack_pointer_rtx, tmp_reg));
        insn = emit_insn (gen_movsi (stack_pointer_rtx, tmp_reg));
      }
@@ -201,7 +201,7 @@ index 3cb1e27..7d139fc 100644
  
    if (frame_pointer_needed)
      {
-@@ -2682,33 +2738,101 @@ xtensa_expand_prologue (void)
+@@ -2683,33 +2739,101 @@ xtensa_expand_prologue (void)
  				     stack_pointer_rtx));
      }
  
@@ -320,7 +320,7 @@ index 3cb1e27..7d139fc 100644
  
    if (count == -1)
      retaddr = gen_rtx_REG (Pmode, A0_REG);
-@@ -2721,28 +2845,31 @@ xtensa_return_addr (int count, rtx frame)
+@@ -2722,28 +2846,31 @@ xtensa_return_addr (int count, rtx frame)
      }
  
  #if TARGET_WINDOWED_ABI
@@ -597,5 +597,5 @@ index 4b308c4..a60bbda 100644
  })
  
 -- 
-1.8.1.4
+2.1.4
 

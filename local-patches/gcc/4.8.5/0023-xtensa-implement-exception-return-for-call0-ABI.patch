@@ -1,7 +1,7 @@
-From 601180aced8f4d0b4dd6ebfe0abc0bdd26a0cd72 Mon Sep 17 00:00:00 2001
+From 36448dfb30a64978d9d13398af6b9924e7d63b2e Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Mon, 12 Jan 2015 15:21:31 +0300
-Subject: [PATCH 23/25] xtensa: implement exception return for call0 ABI
+Subject: [PATCH 23/29] xtensa: implement exception return for call0 ABI
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---
@@ -24,10 +24,10 @@ index 5cc97fe..056d333 100644
  #endif /* RTX_CODE */
  
 diff --git a/gcc/config/xtensa/xtensa.c b/gcc/config/xtensa/xtensa.c
-index a2d1eaf..8b15dad 100644
+index f806329..5ad1ae8 100644
 --- a/gcc/config/xtensa/xtensa.c
 +++ b/gcc/config/xtensa/xtensa.c
-@@ -2579,7 +2579,11 @@ xtensa_call_save_reg(int regno)
+@@ -2580,7 +2580,11 @@ xtensa_call_save_reg(int regno)
      return false;
  
    if (regno == A0_REG)
@@ -40,7 +40,7 @@ index a2d1eaf..8b15dad 100644
  
    return !fixed_regs[regno] && !call_used_regs[regno] &&
      df_regs_ever_live_p (regno);
-@@ -2810,6 +2814,11 @@ xtensa_expand_epilogue (void)
+@@ -2811,6 +2815,11 @@ xtensa_expand_epilogue (void)
  	  offset = xtensa_current_frame_size - UNITS_PER_WORD;
  	}
  
@@ -52,7 +52,7 @@ index a2d1eaf..8b15dad 100644
        for (regno = 0; regno < FIRST_PSEUDO_REGISTER; ++regno)
  	{
  	  if (xtensa_call_save_reg(regno))
-@@ -2844,12 +2853,41 @@ xtensa_expand_epilogue (void)
+@@ -2845,12 +2854,41 @@ xtensa_expand_epilogue (void)
  	      emit_insn (gen_addsi3 (stack_pointer_rtx, stack_pointer_rtx, tmp_reg));
  	    }
  	}
@@ -170,5 +170,5 @@ index e377df0..5303a59 100644
  ;; know if a frame pointer is required until the reload pass, and
  ;; because there may be an incoming argument value in the hard frame
 -- 
-1.8.1.4
+2.1.4
 

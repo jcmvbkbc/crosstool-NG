@@ -1,7 +1,7 @@
-From 46ae7a2cc28b40fef95b860d042a86c3f198183a Mon Sep 17 00:00:00 2001
+From 7eb88cdb998b7254f76c6eed42de60f3cf5ed725 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Tue, 6 Jan 2015 14:24:47 +0300
-Subject: [PATCH 21/25] xtensa: don't emit CFA notes in epilogue
+Subject: [PATCH 21/29] xtensa: don't emit CFA notes in epilogue
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---
@@ -9,10 +9,10 @@ Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
  1 file changed, 3 insertions(+), 15 deletions(-)
 
 diff --git a/gcc/config/xtensa/xtensa.c b/gcc/config/xtensa/xtensa.c
-index 16c2697..52b24c3 100644
+index e4a50ab..380338f 100644
 --- a/gcc/config/xtensa/xtensa.c
 +++ b/gcc/config/xtensa/xtensa.c
-@@ -2758,7 +2758,6 @@ xtensa_expand_epilogue (void)
+@@ -2759,7 +2759,6 @@ xtensa_expand_epilogue (void)
    if (!TARGET_WINDOWED_ABI)
      {
        int regno;
@@ -20,7 +20,7 @@ index 16c2697..52b24c3 100644
        HOST_WIDE_INT offset;
  
        if (xtensa_current_frame_size > (frame_pointer_needed ? 127 : 1024))
-@@ -2766,7 +2765,7 @@ xtensa_expand_epilogue (void)
+@@ -2767,7 +2766,7 @@ xtensa_expand_epilogue (void)
  	  rtx tmp_reg = gen_rtx_REG (Pmode, A9_REG);
  	  emit_move_insn (tmp_reg, GEN_INT (xtensa_current_frame_size -
  					    xtensa_callee_save_size));
@@ -29,7 +29,7 @@ index 16c2697..52b24c3 100644
  					hard_frame_pointer_rtx : stack_pointer_rtx, tmp_reg));
  	  offset = xtensa_callee_save_size - UNITS_PER_WORD;
  	}
-@@ -2801,26 +2800,15 @@ xtensa_expand_epilogue (void)
+@@ -2802,26 +2801,15 @@ xtensa_expand_epilogue (void)
  	      else
  		offset = xtensa_callee_save_size;
  
@@ -59,5 +59,5 @@ index 16c2697..52b24c3 100644
      }
    xtensa_current_frame_size = 0;
 -- 
-1.8.1.4
+2.1.4
 

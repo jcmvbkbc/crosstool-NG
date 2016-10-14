@@ -1,7 +1,7 @@
-From b26a0f3c3701ad0e6ccc74218e0fdaabcbae414e Mon Sep 17 00:00:00 2001
+From 4c5e7a01921eb7077f4f835fed7e581a1bfa7212 Mon Sep 17 00:00:00 2001
 From: Max Filippov <jcmvbkbc@gmail.com>
 Date: Mon, 10 Nov 2014 06:08:22 +0300
-Subject: [PATCH 15/25] xtensa: fix addsi3 pattern for windowed ABI
+Subject: [PATCH 15/29] xtensa: fix addsi3 pattern for windowed ABI
 
 Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
 ---
@@ -22,5 +22,5 @@ index ba634b4..482fd62 100644
  		 (match_operand:SI 2 "add_operand" "d,O,r,J,N")))]
    ""
 -- 
-1.8.1.4
+2.1.4
 
