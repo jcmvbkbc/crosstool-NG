@@ -1,0 +1,17 @@
+diff -durN a/gcc/config.host b/gcc/config.host
+--- a/gcc/config.host   2016-10-04 18:01:56.180731000 +1100
++++ b/gcc/config.host   2016-10-04 17:50:36.127000000 +1100
+@@ -221,6 +221,13 @@
+     host_exeext=.exe
+     host_lto_plugin_soname=cyglto_plugin-0.dll
+     ;;
++  x86_64-*-cygwin*)
++    host_xm_file=i386/xm-cygwin.h
++    out_host_hook_obj=host-cygwin.o
++    host_xmake_file="${host_xmake_file} i386/x-cygwin"
++    host_exeext=.exe
++    host_lto_plugin_soname=cyglto_plugin-0.dll
++    ;;
+   i[34567]86-*-mingw32*)
+     host_xm_file=i386/xm-mingw32.h
+     host_xmake_file="${host_xmake_file} i386/x-mingw32"
