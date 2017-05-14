@@ -583,7 +583,7 @@ diff --git a/newlib/configure.host b/newlib/configure.host
 index f1e1309..de19d18 100644
 --- a/newlib/configure.host
 +++ b/newlib/configure.host
-@@ -282,6 +282,12 @@ case "${host_cpu}" in
+@@ -282,6 +282,13 @@ case "${host_cpu}" in
  	newlib_cflags="${newlib_cflags} -DMALLOC_PROVIDED"
  	newlib_cflags="${newlib_cflags} -DPREFER_SIZE_OVER_SPEED"
          ;;
@@ -592,6 +592,7 @@ index f1e1309..de19d18 100644
 +	machine_dir=xtensa
 +	newlib_cflags="${newlib_cflags} -mlongcalls"
 +	newlib_cflags="${newlib_cflags} -DREENTRANT_SYSCALLS_PROVIDED"
++ 	newlib_cflags="${newlib_cflags} -DMALLOC_PROVIDED"
 +        ;;
    z8k)
  	machine_dir=z8k
