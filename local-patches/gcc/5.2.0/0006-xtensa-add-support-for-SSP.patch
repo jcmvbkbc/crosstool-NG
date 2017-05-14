@@ -1,0 +1,115 @@
+From f3f057378114a2b8155a97609daa9f8d45239ef1 Mon Sep 17 00:00:00 2001
+From: jcmvbkbc <jcmvbkbc@138bc75d-0d04-0410-961f-82ee72b054a4>
+Date: Mon, 8 May 2017 23:53:14 +0000
+Subject: [PATCH 6/6] xtensa: add support for SSP
+
+gcc/
+2017-05-08  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/xtensa/xtensa-protos.h
+       	(xtensa_initial_elimination_offset): New declaration.
+	* config/xtensa/xtensa.c (xtensa_initial_elimination_offset):
+	New function. Move its body from the INITIAL_ELIMINATION_OFFSET
+	macro definition, add case for FRAME_POINTER_REGNUM when
+	FRAME_GROWS_DOWNWARD.
+	* config/xtensa/xtensa.h (FRAME_GROWS_DOWNWARD): New macro
+	definition.
+	(INITIAL_ELIMINATION_OFFSET): Replace body with call to
+	xtensa_initial_elimination_offset.
+
+git-svn-id: svn+ssh://gcc.gnu.org/svn/gcc/trunk@247771 138bc75d-0d04-0410-961f-82ee72b054a4
+Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
+---
+ gcc/config/xtensa/xtensa-protos.h |  1 +
+ gcc/config/xtensa/xtensa.c        | 24 ++++++++++++++++++++++++
+ gcc/config/xtensa/xtensa.h        | 19 ++++---------------
+ 3 files changed, 29 insertions(+), 15 deletions(-)
+
+diff --git a/gcc/config/xtensa/xtensa-protos.h b/gcc/config/xtensa/xtensa-protos.h
+index 1ca1384..981ec8a 100644
+--- a/gcc/config/xtensa/xtensa-protos.h
++++ b/gcc/config/xtensa/xtensa-protos.h
+@@ -73,5 +73,6 @@ extern void xtensa_expand_prologue (void);
+ extern void xtensa_expand_epilogue (void);
+ extern void order_regs_for_local_alloc (void);
+ extern enum reg_class xtensa_regno_to_class (int regno);
++extern HOST_WIDE_INT xtensa_initial_elimination_offset (int from, int to);
+ 
+ #endif /* !__XTENSA_PROTOS_H__ */
+diff --git a/gcc/config/xtensa/xtensa.c b/gcc/config/xtensa/xtensa.c
+index 00aa7a6..57b0052 100644
+--- a/gcc/config/xtensa/xtensa.c
++++ b/gcc/config/xtensa/xtensa.c
+@@ -2711,6 +2711,30 @@ xtensa_frame_pointer_required (void)
+   return false;
+ }
+ 
++HOST_WIDE_INT
++xtensa_initial_elimination_offset (int from, int to)
++{
++  long frame_size = compute_frame_size (get_frame_size ());
++  HOST_WIDE_INT offset;
++
++  switch (from)
++    {
++    case FRAME_POINTER_REGNUM:
++      if (FRAME_GROWS_DOWNWARD)
++	offset = frame_size - (WINDOW_SIZE * UNITS_PER_WORD)
++	  - cfun->machine->callee_save_size;
++      else
++	offset = 0;
++      break;
++    case ARG_POINTER_REGNUM:
++      offset = frame_size;
++      break;
++    default:
++      gcc_unreachable ();
++    }
++
++  return offset;
++}
+ 
+ /* minimum frame = reg save area (4 words) plus static chain (1 word)
+    and the total number of words must be a multiple of 128 bits.  */
+diff --git a/gcc/config/xtensa/xtensa.h b/gcc/config/xtensa/xtensa.h
+index 683ce01..8bc846f 100644
+--- a/gcc/config/xtensa/xtensa.h
++++ b/gcc/config/xtensa/xtensa.h
+@@ -460,9 +460,11 @@ enum reg_class
+ 
+ #define STACK_GROWS_DOWNWARD
+ 
++#define FRAME_GROWS_DOWNWARD flag_stack_protect
++
+ /* Offset within stack frame to start allocating local variables at.  */
+ #define STARTING_FRAME_OFFSET						\
+-  crtl->outgoing_args_size
++  (FRAME_GROWS_DOWNWARD ? 0 : crtl->outgoing_args_size)
+ 
+ /* The ARG_POINTER and FRAME_POINTER are not real Xtensa registers, so
+    they are eliminated to either the stack pointer or hard frame pointer.  */
+@@ -474,20 +476,7 @@ enum reg_class
+ 
+ /* Specify the initial difference between the specified pair of registers.  */
+ #define INITIAL_ELIMINATION_OFFSET(FROM, TO, OFFSET)			\
+-  do {									\
+-    long frame_size = compute_frame_size (get_frame_size ());		\
+-    switch (FROM)							\
+-      {									\
+-      case FRAME_POINTER_REGNUM:					\
+-        (OFFSET) = 0;							\
+-	break;								\
+-      case ARG_POINTER_REGNUM:						\
+-        (OFFSET) = frame_size;						\
+-	break;								\
+-      default:								\
+-	gcc_unreachable ();						\
+-      }									\
+-  } while (0)
++  (OFFSET) = xtensa_initial_elimination_offset ((FROM), (TO))
+ 
+ /* If defined, the maximum amount of space required for outgoing
+    arguments will be computed and placed into the variable
+-- 
+2.1.4
+
