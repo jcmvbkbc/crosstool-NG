@@ -1,0 +1,69 @@
+From 43f444cb419ec5f2910f43e0233bc68ddc09bb33 Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Fri, 19 May 2017 19:48:16 -0700
+Subject: [PATCH 993/995] gcc: xtensa: support dynconfig on windows
+
+2017-05-22  Max Filippov  <jcmvbkbc@gmail.com>
+gcc/
+	* config/xtensa/xtensa-config.c (dlfcn.h, windows.h): New
+	#include'd headers.
+	(RTLD_LAZY): New macro definition.
+	(dlopen, dlsym, dlclose, dlerror): New function definitions.
+---
+ gcc/config/xtensa/xtensa-config.c | 38 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 38 insertions(+)
+
+diff --git a/gcc/config/xtensa/xtensa-config.c b/gcc/config/xtensa/xtensa-config.c
+index 296caf4..3259867 100644
+--- a/gcc/config/xtensa/xtensa-config.c
++++ b/gcc/config/xtensa/xtensa-config.c
+@@ -4,8 +4,46 @@
+ #include "xtensa-config.h"
+ #include "xtensa-dynconfig.h"
+ 
++#if defined (HAVE_DLFCN_H)
++#include <dlfcn.h>
++#elif defined (_WIN32)
++#include <windows.h>
++#define ENABLE_PLUGIN
++#endif
++
+ static struct xtensa_config xtensa_defconfig = XTENSA_CONFIG_INITIALIZER;
+ 
++#if !defined (HAVE_DLFCN_H) && defined (_WIN32)
++
++#define RTLD_LAZY 0      /* Dummy value.  */
++
++static void *
++dlopen (const char *file, int mode ATTRIBUTE_UNUSED)
++{
++  return LoadLibrary (file);
++}
++
++static void *
++dlsym (void *handle, const char *name)
++{
++  return (void *) GetProcAddress ((HMODULE) handle, name);
++}
++
++static int ATTRIBUTE_UNUSED
++dlclose (void *handle)
++{
++  FreeLibrary ((HMODULE) handle);
++  return 0;
++}
++
++static const char *
++dlerror (void)
++{
++  return "Unable to load DLL.";
++}
++
++#endif /* !defined (HAVE_DLFCN_H) && defined (_WIN32)  */
++
+ void *xtensa_load_config (const char *name ATTRIBUTE_UNUSED, void *def)
+ {
+   static int init;
+-- 
+2.1.4
+

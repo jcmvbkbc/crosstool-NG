@@ -1,0 +1,52 @@
+From c79cb427154047ba085a60466f6712f51cbd85e0 Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Wed, 17 May 2017 18:04:43 -0700
+Subject: [RFC 4/5] xtensa: make xtensa_modules dynamic
+
+2017-05-22  Max Filippov  <jcmvbkbc@gmail.com>
+bfd/
+	* xtensa-isa.c (xtensa-dynconfig.h): New #include'd header.
+	(xtensa_get_modules): New function.
+	(xtensa_isa_init): Call xtensa_get_modules instead of taking
+	address of global xtensa_modules.
+---
+ bfd/xtensa-isa.c | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/bfd/xtensa-isa.c b/bfd/xtensa-isa.c
+index 8da75be..79fb76b 100644
+--- a/bfd/xtensa-isa.c
++++ b/bfd/xtensa-isa.c
+@@ -23,6 +23,7 @@
+ #include "libbfd.h"
+ #include "xtensa-isa.h"
+ #include "xtensa-isa-internal.h"
++#include "xtensa-dynconfig.h"
+ 
+ xtensa_isa_status xtisa_errno;
+ char xtisa_error_msg[1024];
+@@ -233,10 +234,20 @@ xtensa_insnbuf_from_chars (xtensa_isa isa,
+ 
+ extern xtensa_isa_internal xtensa_modules;
+ 
++static xtensa_isa_internal *xtensa_get_modules (void)
++{
++  static xtensa_isa_internal *modules;
++
++  if (!modules)
++    modules = xtensa_load_config ("xtensa_modules", &xtensa_modules);
++
++  return modules;
++}
++
+ xtensa_isa
+ xtensa_isa_init (xtensa_isa_status *errno_p, char **error_msg_p)
+ {
+-  xtensa_isa_internal *isa = &xtensa_modules;
++  xtensa_isa_internal *isa = xtensa_get_modules ();
+   int n, is_user;
+ 
+   /* Set up the opcode name lookup table.  */
+-- 
+2.1.4
+

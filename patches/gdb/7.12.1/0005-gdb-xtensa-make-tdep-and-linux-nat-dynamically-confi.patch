@@ -1,0 +1,122 @@
+From 2ba469fe3acc796ebcd2ff128c3d46ac56e4b932 Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Tue, 16 May 2017 11:37:37 -0700
+Subject: [RFC 5/5] gdb: xtensa: make tdep and linux-nat dynamically
+ configurable
+
+Don't use xtensa_tdep directly, use function xtensa_config_get_tdep that
+potentially loads dynamic configuration and returns xtensa tdep pointer
+from there.
+
+Don't use xtensa_regmap_table directly, use function
+xtensa_config_get_regmap_table that potentially loads dynamic
+configuration and returns regmap table from there.
+
+gdb/
+2017-05-22  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-linux-nat.c (xtensa-dynconfig.h): New #include'd
+	header.
+	(xtensa_config_get_regmap_table): New function.
+	(fetch_xtregs, store_xtregs, _initialize_xtensa_linux_nat): Call
+	xtensa_config_get_regmap_table instead of taking address of
+	xtensa_regmap_table.
+	* xtensa-tdep.c (xtensa-dynconfig.h): New #include'd header.
+	(xtensa_config_get_tdep): New function.
+	(xtensa_gdbarch_init): Call xtensa_config_get_tdep instead of
+	taking address of xtensa_tdep.
+---
+ gdb/xtensa-linux-nat.c | 18 +++++++++++++++---
+ gdb/xtensa-tdep.c      | 13 +++++++++++--
+ 2 files changed, 26 insertions(+), 5 deletions(-)
+
+diff --git a/gdb/xtensa-linux-nat.c b/gdb/xtensa-linux-nat.c
+index 836d3f8..7190e37 100644
+--- a/gdb/xtensa-linux-nat.c
++++ b/gdb/xtensa-linux-nat.c
+@@ -44,6 +44,18 @@
+    Keeping these definitions separately allows to introduce
+    hardware-specific overlays.  */
+ #include "xtensa-xtregs.c"
++#include "xtensa-dynconfig.h"
++
++static xtensa_regtable_t *xtensa_config_get_regmap_table (void)
++{
++  static xtensa_regtable_t *regtable;
++
++  if (!regtable)
++    regtable = (xtensa_regtable_t *) xtensa_load_config
++      ("xtensa_regmap_table", &xtensa_regmap_table);
++
++  return regtable;
++}
+ 
+ void
+ fill_gregset (const struct regcache *regcache,
+@@ -228,7 +240,7 @@ fetch_xtregs (struct regcache *regcache, int regnum)
+   if (ptrace (PTRACE_GETXTREGS, tid, 0, (long)&xtregs) < 0)
+     perror_with_name (_("Couldn't get extended registers"));
+ 
+-  for (ptr = xtensa_regmap_table; ptr->name; ptr++)
++  for (ptr = xtensa_config_get_regmap_table (); ptr->name; ptr++)
+     if (regnum == ptr->gdb_regnum || regnum == -1)
+       regcache_raw_supply (regcache, ptr->gdb_regnum,
+ 			   xtregs + ptr->ptrace_offset);
+@@ -244,7 +256,7 @@ store_xtregs (struct regcache *regcache, int regnum)
+   if (ptrace (PTRACE_GETXTREGS, tid, 0, (long)&xtregs) < 0)
+     perror_with_name (_("Couldn't get extended registers"));
+ 
+-  for (ptr = xtensa_regmap_table; ptr->name; ptr++)
++  for (ptr = xtensa_config_get_regmap_table (); ptr->name; ptr++)
+     if (regnum == ptr->gdb_regnum || regnum == -1)
+       regcache_raw_collect (regcache, ptr->gdb_regnum,
+ 			    xtregs + ptr->ptrace_offset);
+@@ -313,7 +325,7 @@ _initialize_xtensa_linux_nat (void)
+   /* Calculate the number range for extended registers.  */
+   xtreg_lo = 1000000000;
+   xtreg_high = -1;
+-  for (ptr = xtensa_regmap_table; ptr->name; ptr++)
++  for (ptr = xtensa_config_get_regmap_table (); ptr->name; ptr++)
+     {
+       if (ptr->gdb_regnum < xtreg_lo)
+ 	xtreg_lo = ptr->gdb_regnum;
+diff --git a/gdb/xtensa-tdep.c b/gdb/xtensa-tdep.c
+index e47c90a..f99ed90 100644
+--- a/gdb/xtensa-tdep.c
++++ b/gdb/xtensa-tdep.c
+@@ -51,6 +51,6 @@
+ 
+ #include "xtensa-isa.h"
+ #include "xtensa-tdep.h"
+-#include "xtensa-config.h"
++#include "xtensa-dynconfig.h"
+ 
+ 
+@@ -3184,6 +3184,15 @@ xtensa_derive_tdep (struct gdbarch_tdep *tdep)
+ /* Module "constructor" function.  */
+ 
+ extern struct gdbarch_tdep xtensa_tdep;
++static struct gdbarch_tdep *xtensa_config_get_tdep (void)
++{
++  static struct gdbarch_tdep *tdep;
++
++  if (!tdep)
++    tdep = (struct gdbarch_tdep *) xtensa_load_config ("xtensa_tdep",
++						       &xtensa_tdep);
++  return tdep;
++}
+ 
+ static struct gdbarch *
+ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+@@ -3196,7 +3205,7 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+   /* We have to set the byte order before we call gdbarch_alloc.  */
+   info.byte_order = XCHAL_HAVE_BE ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
+ 
+-  tdep = &xtensa_tdep;
++  tdep = xtensa_config_get_tdep ();
+   gdbarch = gdbarch_alloc (&info, tdep);
+   xtensa_derive_tdep (tdep);
+ 
+-- 
+2.1.4
+

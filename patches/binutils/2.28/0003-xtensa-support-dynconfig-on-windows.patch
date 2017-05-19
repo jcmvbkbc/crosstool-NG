@@ -1,0 +1,68 @@
+From 6bbff84a38488830dbdf65febcc2483ead38d594 Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Fri, 19 May 2017 17:58:58 -0700
+Subject: [RFC 3/5] xtensa: support dynconfig on windows
+
+2017-05-22  Max Filippov  <jcmvbkbc@gmail.com>
+bfd/
+	* xtensa-config.c (windows.h): New #include'd header.
+	(RTLD_LAZY): New macro definition.
+	(dlopen, dlsym, dlclose, dlerror): New functions.
+---
+ bfd/xtensa-config.c | 33 +++++++++++++++++++++++++++++++++
+ 1 file changed, 33 insertions(+)
+
+diff --git a/bfd/xtensa-config.c b/bfd/xtensa-config.c
+index fdbcca4..3e12e26 100644
+--- a/bfd/xtensa-config.c
++++ b/bfd/xtensa-config.c
+@@ -3,6 +3,8 @@
+ 
+ #if defined (HAVE_DLFCN_H)
+ #include <dlfcn.h>
++#elif defined (HAVE_WINDOWS_H)
++#include <windows.h>
+ #endif
+ #include <stdio.h>
+ #include <stdlib.h>
+@@ -12,6 +14,37 @@
+ 
+ static struct xtensa_config xtensa_defconfig = XTENSA_CONFIG_INITIALIZER;
+ 
++#if !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)
++
++#define RTLD_LAZY 0      /* Dummy value.  */
++
++static void *
++dlopen (const char *file, int mode ATTRIBUTE_UNUSED)
++{
++  return LoadLibrary (file);
++}
++
++static void *
++dlsym (void *handle, const char *name)
++{
++  return GetProcAddress (handle, name);
++}
++
++static int ATTRIBUTE_UNUSED
++dlclose (void *handle)
++{
++  FreeLibrary (handle);
++  return 0;
++}
++
++static const char *
++dlerror (void)
++{
++  return "Unable to load DLL.";
++}
++
++#endif /* !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)  */
++
+ void *xtensa_load_config (const char *name ATTRIBUTE_UNUSED, void *def)
+ {
+   static int init;
+-- 
+2.1.4
+

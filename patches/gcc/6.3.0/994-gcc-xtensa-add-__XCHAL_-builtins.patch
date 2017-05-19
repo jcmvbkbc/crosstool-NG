@@ -1,0 +1,100 @@
+From 798d5883cf140f9cd0d588c459dc1d7c83ebf95a Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Wed, 17 May 2017 17:36:02 -0700
+Subject: [PATCH 994/995] gcc: xtensa: add __XCHAL_* builtins
+
+Provide essential XCHAL_* configuration parameters as __XCHAL_* built-in
+macros. This way it will be possible to use them in libgcc and libc
+without need to patch libgcc or libc source for the specific xtensa core
+configuration.
+
+2017-05-22  Max Filippov  <jcmvbkbc@gmail.com>
+gcc/
+	* config/xtensa/xtensa-config.c (_STRINGIFY, STRINGIFY,
+	XTENSA_CONFIG_ENTRY): New definitions.
+	(xtensa_config_strings): New array with default __XCHAL_*
+	macros.
+	(xtensa_get_config_strings): New function.
+	* config/xtensa/xtensa-protos.h (xtensa_get_config_strings): New
+	declaration.
+	* gcc/config/xtensa/xtensa.h (TARGET_CPU_CPP_BUILTINS): Add new
+	'builtin' variable and loop through string array returned by the
+	xtensa_get_config_strings function call.
+---
+ gcc/config/xtensa/xtensa-config.c | 22 ++++++++++++++++++++++
+ gcc/config/xtensa/xtensa-protos.h |  1 +
+ gcc/config/xtensa/xtensa.h        |  3 +++
+ 3 files changed, 26 insertions(+)
+
+diff --git a/gcc/config/xtensa/xtensa-config.c b/gcc/config/xtensa/xtensa-config.c
+index 3259867..3d242d1 100644
+--- a/gcc/config/xtensa/xtensa-config.c
++++ b/gcc/config/xtensa/xtensa-config.c
+@@ -13,6 +13,17 @@
+ 
+ static struct xtensa_config xtensa_defconfig = XTENSA_CONFIG_INITIALIZER;
+ 
++#define _STRINGIFY(a) #a
++#define STRINGIFY(a) _STRINGIFY(a)
++
++#undef XTENSA_CONFIG_ENTRY
++#define XTENSA_CONFIG_ENTRY(a) "__" #a "=" STRINGIFY(a)
++
++static const char *xtensa_config_strings[] = {
++    XTENSA_CONFIG_ENTRY_LIST,
++    NULL,
++};
++
+ #if !defined (HAVE_DLFCN_H) && defined (_WIN32)
+ 
+ #define RTLD_LAZY 0      /* Dummy value.  */
+@@ -115,3 +126,14 @@ struct xtensa_config *xtensa_get_config (void)
+     }
+   return config;
+ }
++
++const char **xtensa_get_config_strings (void)
++{
++  static const char **config_strings;
++
++  if (!config_strings)
++    config_strings = (const char **) xtensa_load_config ("xtensa_config_strings",
++							 &xtensa_config_strings);
++
++  return config_strings;
++}
+diff --git a/gcc/config/xtensa/xtensa-protos.h b/gcc/config/xtensa/xtensa-protos.h
+index 38901b7..d8eba73 100644
+--- a/gcc/config/xtensa/xtensa-protos.h
++++ b/gcc/config/xtensa/xtensa-protos.h
+@@ -73,5 +73,6 @@ extern void xtensa_expand_prologue (void);
+ extern void xtensa_expand_epilogue (void);
+ extern void order_regs_for_local_alloc (void);
+ extern enum reg_class xtensa_regno_to_class (int regno);
++extern const char **xtensa_get_config_strings (void);
+ 
+ #endif /* !__XTENSA_PROTOS_H__ */
+diff --git a/gcc/config/xtensa/xtensa.h b/gcc/config/xtensa/xtensa.h
+index 7852f44..e1d2e74 100644
+--- a/gcc/config/xtensa/xtensa.h
++++ b/gcc/config/xtensa/xtensa.h
+@@ -63,6 +63,7 @@ along with GCC; see the file COPYING3.  If not see
+ /* Target CPU builtins.  */
+ #define TARGET_CPU_CPP_BUILTINS()					\
+   do {									\
++    const char **builtin;						\
+     builtin_assert ("cpu=xtensa");					\
+     builtin_assert ("machine=xtensa");					\
+     builtin_define ("__xtensa__");					\
+@@ -72,6 +73,8 @@ along with GCC; see the file COPYING3.  If not see
+     builtin_define (TARGET_BIG_ENDIAN ? "__XTENSA_EB__" : "__XTENSA_EL__"); \
+     if (!TARGET_HARD_FLOAT)						\
+       builtin_define ("__XTENSA_SOFT_FLOAT__");				\
++    for (builtin = xtensa_get_config_strings (); *builtin; ++builtin)	\
++      builtin_define (*builtin);					\
+   } while (0)
+ 
+ #define CPP_SPEC " %(subtarget_cpp_spec) "
+-- 
+2.1.4
+

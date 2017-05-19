@@ -1,0 +1,104 @@
+From 9866adb9d87496cf0e9f01843270eb6ba9455031 Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Sun, 7 May 2017 18:10:08 -0700
+Subject: [PATCH 991/995] gcc: xtensa: allow XCHAL_* macros to be non-constant
+
+XCHAL_* macros from the xtensa-config.h are used in a number of places
+that require them to be preprocessor constants. Rewrite these places so
+that non-constant XCHAL_* definitions could be used there.
+
+2017-05-22  Max Filippov  <jcmvbkbc@gmail.com>
+gcc/
+	* config/xtensa/xtensa.c (xtensa_option_override): Append
+	MASK_CONST16 to target_flags in the absence of TARGET_L32R.
+	(hwloop_optimize, hwloop_fail, hwloop_pattern_reg,
+	 xtensa_doloop_hooks): Define unconditionally.
+	(xtensa_reorg_loops): Only call reorg_loops in the presence of
+	TARGET_LOOPS.
+	* config/xtensa/xtensa.h (TARGET_L32R): New definition.
+	(TARGET_DEFAULT): Remove XCHAL_HAVE_L32R condition and account
+	for it in xtensa_option_override.
+	(HARD_FRAME_POINTER_IS_FRAME_POINTER,
+	 HARD_FRAME_POINTER_IS_ARG_POINTER): New definitions.
+---
+ gcc/config/xtensa/xtensa.c | 18 +++++++++---------
+ gcc/config/xtensa/xtensa.h | 11 ++++++++---
+ 2 files changed, 17 insertions(+), 12 deletions(-)
+
+diff --git a/gcc/config/xtensa/xtensa.c b/gcc/config/xtensa/xtensa.c
+index 0181dde..8b20c64 100644
+--- a/gcc/config/xtensa/xtensa.c
++++ b/gcc/config/xtensa/xtensa.c
+@@ -2181,6 +2181,13 @@ xtensa_option_override (void)
+   int regno;
+   machine_mode mode;
+ 
++  /* Use CONST16 in the absence of L32R.
++     Set it in the TARGET_OPTION_OVERRIDE to avoid dependency on xtensa
++     configuration in the xtensa-common.c  */
++
++  if (!TARGET_L32R)
++    target_flags |= MASK_CONST16;
++
+   if (!TARGET_BOOLEANS && TARGET_HARD_FLOAT)
+     error ("boolean registers required for the floating-point option");
+ 
+@@ -4053,8 +4060,6 @@ xtensa_invalid_within_doloop (const rtx_insn *insn)
+ 
+ /* Optimize LOOP.  */
+ 
+-#if TARGET_LOOPS
+-
+ static bool
+ hwloop_optimize (hwloop_info loop)
+ {
+@@ -4241,14 +4246,9 @@ static struct hw_doloop_hooks xtensa_doloop_hooks =
+ static void
+ xtensa_reorg_loops (void)
+ {
+-  reorg_loops (false, &xtensa_doloop_hooks);
+-}
+-#else
+-static inline void
+-xtensa_reorg_loops (void)
+-{
++  if (TARGET_LOOPS)
++    reorg_loops (false, &xtensa_doloop_hooks);
+ }
+-#endif
+ 
+ /* Implement the TARGET_MACHINE_DEPENDENT_REORG pass.  */
+ 
+diff --git a/gcc/config/xtensa/xtensa.h b/gcc/config/xtensa/xtensa.h
+index c32e8ca..59d6b00 100644
+--- a/gcc/config/xtensa/xtensa.h
++++ b/gcc/config/xtensa/xtensa.h
+@@ -66,10 +66,9 @@ along with GCC; see the file COPYING3.  If not see
+ #define TARGET_LOOPS	        XCHAL_HAVE_LOOPS
+ #define TARGET_WINDOWED_ABI	(XSHAL_ABI == XTHAL_ABI_WINDOWED)
+ #define TARGET_DEBUG		XCHAL_HAVE_DEBUG
++#define TARGET_L32R		XCHAL_HAVE_L32R
+ 
+-#define TARGET_DEFAULT \
+-  ((XCHAL_HAVE_L32R	? 0 : MASK_CONST16) |				\
+-   MASK_SERIALIZE_VOLATILE)
++#define TARGET_DEFAULT (MASK_SERIALIZE_VOLATILE)
+ 
+ #ifndef HAVE_AS_TLS
+ #define HAVE_AS_TLS 0
+@@ -362,6 +361,12 @@ extern char xtensa_hard_regno_mode_ok[][FIRST_PSEUDO_REGISTER];
+ /* Base register for access to arguments of the function.  */
+ #define ARG_POINTER_REGNUM (GP_REG_FIRST + 17)
+ 
++/* Hard frame pointer is neither frame nor arg pointer.
++   The definitions are here because actual hard frame pointer register
++   definition is not a preprocessor constant.  */
++#define HARD_FRAME_POINTER_IS_FRAME_POINTER 0
++#define HARD_FRAME_POINTER_IS_ARG_POINTER 0
++
+ /* For now we don't try to use the full set of boolean registers.  Without
+    software pipelining of FP operations, there's not much to gain and it's
+    a real pain to get them reloaded.  */
+-- 
+2.1.4
+
