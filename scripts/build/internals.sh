@@ -17,7 +17,7 @@ do_finish() {
                 strip_args=""
                 ;;
             *)
-                strip_args="--strip-all -v"
+                strip_args="--strip-all"
                 ;;
         esac
         CT_DoLog INFO "Stripping all toolchain executables"
