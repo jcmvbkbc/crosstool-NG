@@ -16,6 +16,9 @@ do_finish() {
             *darwin*)
                 strip_args=""
                 ;;
+            *freebsd*)
+                strip_args="--strip-all"
+                ;;
             *)
                 strip_args="--strip-all -v"
                 ;;
