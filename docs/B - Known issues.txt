@@ -252,3 +252,10 @@ Workaround:
   use "setarch i686 ct-ng build"
 
 --------------------------------
+Symptoms:
+  Build fails with: "[ERROR]  Don't set LD_LIBRARY_PATH. It screws up the build."
+
+Fix:
+  "unset LD_LIBRARY_PATH"
+
+--------------------------------
