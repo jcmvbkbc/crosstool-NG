@@ -113,6 +113,7 @@ do_debug_gdb_build() {
             --with-build-sysroot="${CT_SYSROOT_DIR}"    \
             --with-sysroot="${CT_SYSROOT_DIR}"          \
             --disable-werror                            \
+            --disable-tui								\
             "${cross_extra_config[@]}"                  \
             "${CT_GDB_CROSS_EXTRA_CONFIG_ARRAY[@]}"
 
