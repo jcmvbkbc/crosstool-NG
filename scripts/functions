@@ -2248,6 +2248,8 @@ CT_DoExtractPatch()
         CT_DoExecLog ALL mkdir -p "${CT_BUILD_DIR}/overlay"
         if [ "${CT_OVERLAY_SRC_RELEASE}" = "y" ]; then
             overlay="${CT_TARBALLS_DIR}/"$(basename "${CT_OVERLAY_SRC_URL}")
+        elif [ "${CT_OVERLAY_SRC_DEVEL}" = "y" ]; then
+            overlay="${CT_TARBALLS_DIR}/${CT_OVERLAY_BASENAME}.tar.bz2"
         elif [ "${CT_OVERLAY_SRC_CUSTOM}" = "y" ]; then
             overlay="${CT_OVERLAY_CUSTOM_LOCATION}"
         fi

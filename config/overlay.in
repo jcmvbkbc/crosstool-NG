@@ -24,6 +24,80 @@ config OVERLAY_SRC_URL
 
 endif
 
+config OVERLAY_SRC_DEVEL
+    bool "Vendor/custom repository"
+    help
+      Check out from a repository.
+      Default is the vendor repository at git://sourceware.org/git/binutils-gdb.git
+
+if OVERLAY_SRC_DEVEL
+
+choice
+    bool "VCS type"
+    default OVERLAY_DEVEL_VCS_git
+    help
+      Version control system from which the sources will be checked out.
+      The default value points to the development repository for binutils.
+
+config OVERLAY_DEVEL_VCS_git
+    bool "Git"
+
+config OVERLAY_DEVEL_VCS_svn
+    bool "Subversion"
+
+config OVERLAY_DEVEL_VCS_hg
+    bool "Mercurial"
+
+config OVERLAY_DEVEL_VCS_cvs
+    bool "CVS"
+
+endchoice
+
+config OVERLAY_DEVEL_VCS
+    string
+    default "git" if OVERLAY_DEVEL_VCS_git
+    default "svn" if OVERLAY_DEVEL_VCS_svn
+    default "hg" if OVERLAY_DEVEL_VCS_hg
+    default "cvs" if OVERLAY_DEVEL_VCS_cvs
+
+config OVERLAY_DEVEL_URL
+    string "Repository URL"
+    default "git://sourceware.org/git/binutils-gdb.git"
+    help
+      Repository URL.
+
+      For CVS, enter both the value of CVS root and the module name, separated
+      by a space.
+
+config OVERLAY_DEVEL_BRANCH
+    string "Branch/tag to check out"
+    default ""
+    help
+      Git/CVS: branch/tag to be checked out
+      Subversion: directories to append to the repository URL (i.e. branch or tag)
+      Mercurial: official guide recommends using separate repositories to maintain
+      stable branches. You likely need to change the repository URL, rather than
+      enter anything here.
+
+config OVERLAY_DEVEL_REVISION
+    string "Revision/changeset"
+    default ""
+    help
+      Commit ID or revision ID to check out.
+      Git: enter the commit ID to check out a commit.
+      CVS: enter the date in "YYYY/MM/DD HH:MM:SS" format (UTC) to check out certain date.
+      Subversion: enter the revision.
+
+config OVERLAY_DEVEL_SUBDIR
+    string "Subdirectory in the repository"
+    default ""
+    help
+      Some projects produce releases not from the top-level directory in the
+      repository, but rather from some subdirectory. If it is the case,
+      specify this subdirectory here.
+
+endif
+
 config OVERLAY_SRC_CUSTOM
     bool "Custom location"
     help
