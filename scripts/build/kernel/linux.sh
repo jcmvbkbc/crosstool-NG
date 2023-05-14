@@ -10,7 +10,8 @@ CT_DoKernelTupleValues()
         # should be added here when someone starts to care about them.
         case "${CT_ARCH}" in
             arm*|microblaze*)   CT_TARGET_KERNEL="linux" ;;
-            c6x|m68k|xtensa*)   CT_TARGET_KERNEL="uclinux" ;;
+            c6x|m68k)           CT_TARGET_KERNEL="uclinux" ;;
+            xtensa*)            CT_TARGET_KERNEL="${CT_ARCH_BINFMT_FLAT:+uc}linux" ;;
             *)                  CT_Abort "Unsupported no-mmu arch '${CT_ARCH}'"
         esac
     fi
