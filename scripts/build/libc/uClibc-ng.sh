@@ -79,7 +79,7 @@ uClibc_ng_backend_once()
         --no-print-directory -f .show-cpu-cflags.mk show-cpu-flags )
     CT_DoExecLog ALL rm -f .show-cpu-cflags.mk
     CT_DoLog DEBUG "CPU_CFLAGS detected by uClibc: ${cfg_cflags[@]}"
-    for f in ${multi_flags}; do
+    for f in ${multi_flags} ${CT_TARGET_CFLAGS}; do
         for cf in ${cfg_cflags}; do
             if [ "${f}" = "${cf}" ]; then
                 f=
