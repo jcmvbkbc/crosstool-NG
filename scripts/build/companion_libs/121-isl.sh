@@ -14,7 +14,7 @@ if [ "${CT_ISL}" = "y" ]; then
 # Download ISL
 do_isl_get() {
     CT_GetFile "isl-${CT_ISL_VERSION}" \
-        http://isl.gforge.inria.fr
+        https://libisl.sourceforge.io
 }
 
 # Extract ISL
